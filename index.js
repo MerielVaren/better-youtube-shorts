@@ -18,7 +18,7 @@
 // @license            MIT
 // @icon               https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
- 
+
 (() => {
   let currentUrl = "";
   const once = (fn) => {
@@ -29,10 +29,15 @@
       return await fn(...args);
     };
   };
-  const infoFn = once(async (reel) => {
-    const globalOnce = await GM.getValue("globalOnce");
-    if (globalOnce === void 0 || globalOnce === false) {
-      GM.setValue("globalOnce", true);
+
+  const infoFn = once(async () => {
+    const version = GM.getValue("version");
+    const shouldNotifyUserAboutChanges = false;
+    if (
+      !version ||
+      (version !== GM.info.script.version && shouldNotifyUserAboutChanges)
+    ) {
+      GM.setValue("version", GM.info.script.version);
       const info = document.createElement("div");
       info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s; pointer-events: none;`;
       const infoText = document.createElement("div");
@@ -46,6 +51,7 @@
       }, 10000);
     }
   });
+
   const initialize = once(async () => {
     let volumeStyle = await GM.getValue("volumeStyle");
     if (volumeStyle === void 0) {
@@ -147,7 +153,7 @@
           border-radius: 50%;
         }`
     );
- 
+
     let seekMouseDown = false;
     let lastCurSeconds = 0;
     let video = null;
@@ -165,7 +171,7 @@
       "continueFromLastCheckpoint"
     );
     let lastShortsId = "";
- 
+
     if (autoScroll === void 0) {
       autoScroll = true;
       GM.setValue("autoScroll", autoScroll);
@@ -190,7 +196,7 @@
       openWatchInCurrentTab = false;
       GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab);
     }
- 
+
     let shortsCheckpoints;
     if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
       shortsCheckpoints = await GM.getValue("shortsCheckpoints");
@@ -202,7 +208,7 @@
         GM.setValue("shortsCheckpoints", shortsCheckpoints);
       }
     }
- 
+
     GM.registerMenuCommand(
       `Constant Volume: ${constantVolume ? "on" : "off"}`,
       () => {
@@ -249,7 +255,7 @@
         location.reload();
       }
     );
- 
+
     const observer = new MutationObserver(
       async (mutations, shortsReady = false, videoPlayerReady = false) => {
         outer: for (const mutation of mutations) {
@@ -280,7 +286,7 @@
       childList: true,
       subtree: true,
     });
- 
+
     function videoOperationMode(e) {
       const volumeSlider = document.getElementById("byts-vol");
       if (!e.shiftKey) {
@@ -332,7 +338,7 @@
         }
       }
     }
- 
+
     function shortsOperationMode(e) {
       const volumeSlider = document.getElementById("byts-vol");
       if (
@@ -397,7 +403,7 @@
         }
       }
     }
- 
+
     function addShortcuts() {
       if (operationMode === "Video") {
         const observer = new MutationObserver((mutations) => {
@@ -471,11 +477,11 @@
         }
       });
     }
- 
+
     function padTo2Digits(num) {
       return num.toString().padStart(2, "0");
     }
- 
+
     function updateVidElemWithRAF() {
       try {
         if (currentUrl?.includes("youtube.com/shorts")) {
@@ -486,15 +492,15 @@
       }
       requestAnimationFrame(updateVidElemWithRAF);
     }
- 
+
     function navigationButtonDown() {
       document.querySelector("#navigation-button-down button").click();
     }
- 
+
     function navigationButtonUp() {
       document.querySelector("#navigation-button-up button").click();
     }
- 
+
     function setVideoPlaybackTime(event, player) {
       const rect = player.getBoundingClientRect();
       let offsetX = event.clientX - rect.left;
@@ -507,7 +513,7 @@
       if (currentTime === 0) currentTime = 1e-6;
       video.currentTime = currentTime;
     }
- 
+
     async function updateVidElem() {
       const currentVideo = document.querySelector(
         "#shorts-player > div.html5-video-container > video"
@@ -515,24 +521,31 @@
       if (video !== currentVideo) {
         video = currentVideo;
       }
- 
+
       if (constantVolume) {
         video.volume = await GM.getValue("volume", 0);
       }
- 
+
       const reel = document.querySelector("ytd-reel-video-renderer[is-active]");
       if (reel === null) {
         return;
       }
- 
+
+      const shortsPlayerControls = document.querySelector(
+        "#scrubber > ytd-scrubber > shorts-player-controls"
+      );
+      const scrubber = document.getElementById("scrubber");
+      shortsPlayerControls?.remove();
+      scrubber?.remove();
+
       infoFn(reel);
- 
+
       if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
         const currentSec = Math.floor(video.currentTime);
         const shortsUrlList = location.href.split("/");
         if (!shortsUrlList.includes("shorts")) return;
         const shortsId = shortsUrlList.pop();
- 
+
         if (shortsId !== lastShortsId) {
           lastShortsId = shortsId;
           const checkpoint = shortsCheckpoints[shortsId] || 1e-6;
@@ -544,14 +557,14 @@
           }
           video.play();
         }
- 
+
         if (currentSec !== lastCurSeconds && video.currentTime !== 0) {
           lastCurSeconds = currentSec;
           shortsCheckpoints[shortsId] = currentSec;
           GM.setValue("shortsCheckpoints", shortsCheckpoints);
         }
       }
- 
+
       if (operationMode === "Shorts") {
         document.removeEventListener("keydown", videoOperationMode, {
           capture: true,
@@ -563,7 +576,7 @@
           capture: true,
         });
       }
- 
+
       // Volume Slider
       let volumeSliderDiv = document.getElementById("byts-vol-div");
       let volumeSlider = document.getElementById("byts-vol");
@@ -613,7 +626,7 @@
       ).toFixed()}%`;
       volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 5}px`;
       volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 5}px`;
- 
+
       // Progress Bar
       let progressBar = document.getElementById("byts-progbar");
       const reelProgressBar = reel.querySelector("#byts-progbar");
@@ -630,7 +643,7 @@
           }px;`;
         }
         reel.appendChild(progressBar);
- 
+
         let wasPausedBeforeDrag = false;
         progressBar.addEventListener("mousedown", function (e) {
           seekMouseDown = true;
@@ -655,7 +668,7 @@
         });
       }
       progressBar.style.marginTop = `${reel.offsetHeight - 6}px`;
- 
+
       // Progress Bar (Inner Red Bar)
       const progressTime = (video.currentTime / video.duration) * 100;
       let InnerProgressBar = progressBar.querySelector("#byts-progress");
@@ -666,17 +679,17 @@
         progressBar.appendChild(InnerProgressBar);
       }
       InnerProgressBar.style.width = `${progressTime}%`;
- 
+
       // Time Info
       const durSecs = Math.floor(video.duration);
       const durMinutes = Math.floor(durSecs / 60);
       const durSeconds = durSecs % 60;
       const curSecs = Math.floor(video.currentTime);
- 
+
       let timeInfo = document.getElementById("byts-timeinfo");
       let timeInfoText = document.getElementById("byts-timeinfo-textdiv");
       const reelTimeInfo = reel.querySelector("#byts-timeinfo");
- 
+
       if (!Number.isNaN(durSecs) && reelTimeInfo !== null) {
         timeInfoText.textContent = `${Math.floor(curSecs / 60)}:${padTo2Digits(
           curSecs % 60
@@ -686,7 +699,7 @@
         lastCurSeconds = curSecs;
         const curMinutes = Math.floor(curSecs / 60);
         const curSeconds = curSecs % 60;
- 
+
         if (reelTimeInfo === null) {
           if (timeInfo === null) {
             timeInfo = document.createElement("div");
@@ -709,7 +722,7 @@
         }
       }
       timeInfo.style.marginTop = `${reel.offsetHeight + 2}px`;
- 
+
       // AutoScroll
       let autoScrollDiv = document.getElementById("byts-autoscroll-div");
       const reelAutoScrollDiv = reel.querySelector("#byts-autoscroll-div");
