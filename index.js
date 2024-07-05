@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            1.8.4
+// @version            2.0.1
 // @description        Provides more control features for Youtube Shorts, including jumping to the corresponding video page, volume control, progress bar, auto-scroll, hotkeys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -36,9 +36,9 @@
   const infoMainText = `BTYS Version ${GM.info.script.version}<br>
     We have some fix for the new Youtube Shorts layout.<br>
     Since youtube changed its own layout, we have to change our layout too.😑<br>
-    We deleted the progress bar that youtube added for shorts, it's too ugly, it's a disaster.🤮<br>
     We have added support for the light mode, now you can use Better Youtube Shorts in light mode.🌞<br>
-    Don't ask why it wasn't supported before, as a programmer, I never use light mode.🤷‍♂️<br>
+    We added a new option: "Shorts Auto Switch To Video".📹<br>
+    Tired of watching shorts? Turn on this option and you will be redirected to the video page automatically.🔀<br>
     If you have any feedback on the new UI, please leave a message in the Greasyfork feedback area.🍴<br>
     DOUBLE CLICK this message to close it.👈<br>
     `;
@@ -78,6 +78,24 @@
       });
     }
   });
+
+  let shortsAutoSwitchToVideo;
+  (async () => {
+    shortsAutoSwitchToVideo = await GM.getValue("shortsAutoSwitchToVideo");
+    if (shortsAutoSwitchToVideo === void 0) {
+      shortsAutoSwitchToVideo = false;
+      GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
+    }
+    GM.registerMenuCommand(
+      `Shorts Auto Switch To Video: ${shortsAutoSwitchToVideo ? "on" : "off"}`,
+      () => {
+        shortsAutoSwitchToVideo = !shortsAutoSwitchToVideo;
+        GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
+          () => location.href = location.href.replace("watch?v=", "shorts/")
+        );
+      }
+    );
+  })();
 
   const initialize = once(async () => {
     GM.addStyle(
@@ -203,7 +221,6 @@
       openWatchInCurrentTab = false;
       GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab);
     }
-
     let shortsCheckpoints;
     if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
       shortsCheckpoints = await GM.getValue("shortsCheckpoints");
@@ -220,14 +237,14 @@
       `Constant Volume: ${constantVolume ? "on" : "off"}`,
       () => {
         constantVolume = !constantVolume;
-        GM.setValue("constantVolume", constantVolume);
-        location.reload();
+        GM.setValue("constantVolume", constantVolume).then(() =>
+          location.reload()
+        );
       }
     );
     GM.registerMenuCommand(`Operating Mode: ${operationMode}`, () => {
       operationMode = operationMode === "video" ? "shorts" : "video";
-      GM.setValue("operationMode", operationMode);
-      location.reload();
+      GM.setValue("operationMode", operationMode).then(() => location.reload());
     });
     GM.registerMenuCommand(
       `Continue From Last Checkpoint: ${Object.keys(checkpointStatusEnum)
@@ -237,24 +254,26 @@
         .toLowerCase()}`,
       () => {
         continueFromLastCheckpoint = (continueFromLastCheckpoint + 1) % 3;
-        GM.setValue("continueFromLastCheckpoint", continueFromLastCheckpoint);
-        location.reload();
+        GM.setValue(
+          "continueFromLastCheckpoint",
+          continueFromLastCheckpoint
+        ).then(() => location.reload());
       }
     );
     GM.registerMenuCommand(
       `Loop Playback: ${loopPlayback ? "on" : "off"}`,
       () => {
         loopPlayback = !loopPlayback;
-        GM.setValue("loopPlayback", loopPlayback);
-        location.reload();
+        GM.setValue("loopPlayback", loopPlayback).then(() => location.reload());
       }
     );
     GM.registerMenuCommand(
       `Open Watch in Current Tab: ${openWatchInCurrentTab ? "on" : "off"}`,
       () => {
         openWatchInCurrentTab = !openWatchInCurrentTab;
-        GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab);
-        location.reload();
+        GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab).then(() =>
+          location.reload()
+        );
       }
     );
 
@@ -653,6 +672,7 @@
         });
         document.addEventListener("mousemove", function (e) {
           if (!seekMouseDown) return;
+          e.preventDefault();
           setVideoPlaybackTime(e, progressBar);
           if (!video.paused) {
             video.pause();
@@ -783,6 +803,11 @@
     if (destinationUrl.startsWith("about:blank")) return;
     const href = destinationUrl || location.href;
     currentUrl = href;
+    console.log(shortsAutoSwitchToVideo);
+    if (shortsAutoSwitchToVideo && href.includes("youtube.com/shorts")) {
+      currentUrl = location.href = href.replace("shorts/", "watch?v=");
+      return;
+    }
     const isShorts = href.includes("youtube.com/shorts");
     if (isShorts) {
       initialize();
