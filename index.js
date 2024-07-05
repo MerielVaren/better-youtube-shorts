@@ -624,7 +624,7 @@
       volumeTextDiv.textContent = `${(
         video.volume.toFixed(2) * 100
       ).toFixed()}%`;
-      volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 1}px`;
+      volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
       volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 1}px`;
 
       // Progress Bar
