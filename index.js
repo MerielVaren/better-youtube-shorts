@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.0.1
+// @version            2.0.2
 // @description        Provides more control features for Youtube Shorts, including jumping to the corresponding video page, volume control, progress bar, auto-scroll, hotkeys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -803,7 +803,6 @@
     if (destinationUrl.startsWith("about:blank")) return;
     const href = destinationUrl || location.href;
     currentUrl = href;
-    console.log(shortsAutoSwitchToVideo);
     if (shortsAutoSwitchToVideo && href.includes("youtube.com/shorts")) {
       currentUrl = location.href = href.replace("shorts/", "watch?v=");
       return;
