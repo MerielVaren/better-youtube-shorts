@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            1.8.2
+// @version            1.8.3
 // @description        Provides more control features for Youtube Shorts, including jumping to the corresponding video page, volume control, progress bar, auto-scroll, hotkeys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -20,47 +20,69 @@
 // ==/UserScript==
 
 (() => {
+  const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
   const once = (fn) => {
     let done = false;
+    let result;
     return async (...args) => {
-      if (done) return;
+      if (done) return result;
       done = true;
-      return await fn(...args);
+      result = await fn(...args);
+      return result;
     };
   };
 
-  const infoFn = once(async () => {
-    const version = GM.getValue("version");
-    const shouldNotifyUserAboutChanges = false;
+  const infoMainText = `BTYS Version ${GM.info.script.version}<br>
+    We have some fix for the new Youtube Shorts layout.<br>
+    Since youtube changed its own layout, we have to change our layout too.😑<br>
+    We deleted the progress bar that youtube added for shorts, it's too ugly, it's a disaster.🤮<br>
+    We have added support for the light mode, now you can use Better Youtube Shorts in light mode.🌞<br>
+    Don't ask why it wasn't supported before, as a programmer, I never use light mode.🤷‍♂️<br>
+    If you have any feedback on the new UI, please leave a message in the Greasyfork feedback area.🍴<br>
+    DOUBLE CLICK this message to close it.👈<br>
+    `;
+
+  const higherVersion = (v1, v2) => {
+    const v1Arr = v1.split(".");
+    const v2Arr = v2.split(".");
+    for (let i = 0; i < v1Arr.length; i++) {
+      if (v1Arr[i] > v2Arr[i]) {
+        return true;
+      } else if (v1Arr[i] < v2Arr[i]) {
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const infoFn = once(async (video, reel) => {
+    const version = await GM.getValue("version");
+    const shouldNotifyUserAboutChanges = true;
     if (
       !version ||
-      (version !== GM.info.script.version && shouldNotifyUserAboutChanges)
+      (typeof version === "string" &&
+        higherVersion(GM.info.script.version, version) &&
+        shouldNotifyUserAboutChanges)
     ) {
       GM.setValue("version", GM.info.script.version);
       const info = document.createElement("div");
-      info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s; pointer-events: none;`;
+      info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
       const infoText = document.createElement("div");
       infoText.style.cssText = `background-color: white; padding: 10px; border-radius: 10px; font-size: 1.5rem;`;
-      infoText.innerHTML =
-        "Better Youtube Shorts has some new features🎉<br>See options in the Tampermonkey menu.🐒<br>Detailed information can be found in the Greasyfork page.🍴<br>Sorry for the disturbance, this message will disappear in 10 seconds.🙇";
+      infoText.innerHTML = infoMainText;
       info.appendChild(infoText);
       reel.appendChild(info);
-      setTimeout(() => {
+      info.addEventListener("dblclick", () => {
         info.remove();
-      }, 10000);
+      });
     }
   });
 
   const initialize = once(async () => {
-    let volumeStyle = await GM.getValue("volumeStyle");
-    if (volumeStyle === void 0) {
-      volumeStyle = "speaker";
-      GM.setValue("volumeStyle", volumeStyle);
-    }
     GM.addStyle(
       `input[type="range"].volslider {
-          height: 14px;
+          height: 12px;
           -webkit-appearance: none;
           margin: 10px 0;
         }
@@ -75,28 +97,13 @@
           border-radius: 25px;
           border: 1px solid #000000;
         }
-        ${
-          volumeStyle === "dot"
-            ? `input[type="range"].volslider::-webkit-slider-thumb {
+        input[type="range"].volslider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 15px;
-          height: 15px;
-          margin-top: -4px;
+          width: 12px;
+          height: 12px;
+          margin-top: -2px;
           border-radius: 50%;
-          background: white;
-        }`
-            : `input[type="range"].volslider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            margin-top: -7px;
-            border-radius: 0px;
-            background-image: url("https://i.imgur.com/vcQoCVS.png");
-            background-size: 20px;
-            background-repeat: no-repeat;
-            background-position: 50%;
-          }`
-        }
+          background: ${isDarkMode ? "white" : "black"};
         }
         input[type="range"]:focus::-webkit-slider-runnable-track {
           background: rgb(50 50 50);
@@ -104,8 +111,8 @@
         .switch {
           position: relative;
           display: inline-block;
-          width: 46px;
-          height: 20px;
+          width: 40px;
+          height: 12px;
         }
         .switch input {
           opacity: 0;
@@ -128,9 +135,9 @@
           content: "";
           height: 12px;
           width: 12px;
-          left: 4px;
-          bottom: 4px;
-          background-color: white;
+          left: 0px;
+          bottom: 0px;
+          background-color: ${isDarkMode ? "white" : "black"};
           -webkit-transition: 0.4s;
           transition: 0.4s;
         }
@@ -138,12 +145,12 @@
           background-color: #ff0000;
         }
         input:focus + .slider {
-          box-shadow: 0 0 1px #ff0000;
+          box-shadow: 0 0 0px #ff0000;
         }
         input:checked + .slider:before {
-          -webkit-transform: translateX(26px);
-          -ms-transform: translateX(26px);
-          transform: translateX(26px);
+          -webkit-transform: translateX(29px);
+          -ms-transform: translateX(29px);
+          transform: translateX(29px);
         }
         /* Rounded sliders */
         .slider.round {
@@ -220,11 +227,6 @@
     GM.registerMenuCommand(`Operating Mode: ${operationMode}`, () => {
       operationMode = operationMode === "video" ? "shorts" : "video";
       GM.setValue("operationMode", operationMode);
-      location.reload();
-    });
-    GM.registerMenuCommand(`Volume Style: ${volumeStyle}`, () => {
-      volumeStyle = volumeStyle === "speaker" ? "dot" : "speaker";
-      GM.setValue("volumeStyle", volumeStyle);
       location.reload();
     });
     GM.registerMenuCommand(
@@ -538,7 +540,7 @@
       shortsPlayerControls?.remove();
       scrubber?.remove();
 
-      infoFn(reel);
+      infoFn(video, reel);
 
       if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
         const currentSec = Math.floor(video.currentTime);
@@ -586,9 +588,7 @@
         if (volumeSliderDiv === null) {
           volumeSliderDiv = document.createElement("div");
           volumeSliderDiv.id = "byts-vol-div";
-          volumeSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 5px; margin-top: ${
-            reel.offsetHeight + 5
-          }px;`;
+          volumeSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 5px; margin-top: ${reel.offsetHeight}px;`;
           volumeSlider = document.createElement("input");
           volumeSlider.style.cssText = `user-select: none; width: 80px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
           volumeSlider.type = "range";
@@ -606,9 +606,9 @@
           volumeSliderDiv.appendChild(volumeSlider);
           volumeTextDiv = document.createElement("div");
           volumeTextDiv.id = "byts-vol-textdiv";
-          volumeTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: white; font-size: 1.2rem; margin-left: ${
-            volumeSlider.offsetWidth + 5
-          }px`;
+          volumeTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: ${
+            isDarkMode ? "white" : "black"
+          }; font-size: 1.2rem; margin-left: ${volumeSlider.offsetWidth + 1}px`;
           volumeTextDiv.textContent = `${(
             video.volume.toFixed(2) * 100
           ).toFixed()}%`;
@@ -624,8 +624,8 @@
       volumeTextDiv.textContent = `${(
         video.volume.toFixed(2) * 100
       ).toFixed()}%`;
-      volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 5}px`;
-      volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 5}px`;
+      volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 1}px`;
+      volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 1}px`;
 
       // Progress Bar
       let progressBar = document.getElementById("byts-progbar");
@@ -638,8 +638,8 @@
         if (progressBar === null) {
           progressBar = document.createElement("div");
           progressBar.id = "byts-progbar";
-          progressBar.style.cssText = `user-select: none; cursor: pointer; width: 98%; height: 6px; background-color: #343434; position: absolute; border-radius: 10px; margin-top: ${
-            reel.offsetHeight - 6
+          progressBar.style.cssText = `user-select: none; cursor: pointer; width: 98%; height: 7px; background-color: #343434; position: absolute; border-radius: 10px; margin-top: ${
+            reel.offsetHeight - 7
           }px;`;
         }
         reel.appendChild(progressBar);
@@ -667,7 +667,7 @@
           }
         });
       }
-      progressBar.style.marginTop = `${reel.offsetHeight - 6}px`;
+      progressBar.style.marginTop = `${reel.offsetHeight - 7}px`;
 
       // Progress Bar (Inner Red Bar)
       const progressTime = (video.currentTime / video.duration) * 100;
@@ -705,11 +705,13 @@
             timeInfo = document.createElement("div");
             timeInfo.id = "byts-timeinfo";
             timeInfo.style.cssText = `user-select: none; display: flex; right: auto; left: auto; position: absolute; margin-top: ${
-              reel.offsetHeight + 2
+              reel.offsetHeight - 2
             }px;`;
             timeInfoText = document.createElement("div");
             timeInfoText.id = "byts-timeinfo-textdiv";
-            timeInfoText.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: white; font-size: 1.2rem;`;
+            timeInfoText.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
+              isDarkMode ? "white" : "black"
+            }; font-size: 1.2rem;`;
             timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
               curSeconds
             )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
@@ -721,7 +723,7 @@
           )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
         }
       }
-      timeInfo.style.marginTop = `${reel.offsetHeight + 2}px`;
+      timeInfo.style.marginTop = `${reel.offsetHeight - 2}px`;
 
       // AutoScroll
       let autoScrollDiv = document.getElementById("byts-autoscroll-div");
@@ -731,14 +733,17 @@
           autoScrollDiv = document.createElement("div");
           autoScrollDiv.id = "byts-autoscroll-div";
           autoScrollDiv.style.cssText = `user-select: none; display: flex; right: 0px; position: absolute; margin-top: ${
-            reel.offsetHeight + 2
+            reel.offsetHeight - 3
           }px;`;
           const autoScrollTextDiv = document.createElement("div");
-          autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: white; font-size: 1.2rem;`;
+          autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
+            isDarkMode ? "white" : "black"
+          }; font-size: 1.2rem;`;
           autoScrollTextDiv.textContent = "Auto Scroll ";
           autoScrollDiv.appendChild(autoScrollTextDiv);
           const autoScrollSwitch = document.createElement("label");
           autoScrollSwitch.className = "switch";
+          autoScrollSwitch.style.marginTop = "5px";
           const autoscrollInput = document.createElement("input");
           autoscrollInput.id = "byts-autoscroll-input";
           autoscrollInput.type = "checkbox";
@@ -768,7 +773,9 @@
           video.removeEventListener("ended", navigationButtonDown);
         }
       }
-      autoScrollDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
+      autoScrollDiv.style.marginTop = `${reel.offsetHeight - 3}px`;
+      autoScrollSlider.style.marginTop = `0px`;
+      autoScrollSwitch.style.marginTop = "5px";
     }
   });
   const urlChange = (event) => {
