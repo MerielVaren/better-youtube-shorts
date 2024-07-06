@@ -2,24 +2,25 @@
 
 ## 為 youtube shorts 提供了更多功能，包括
 
+- 可自動跳轉到對應video界面
 - 進度條（含時間顯示，可以拖動）
 - 音量控制（含音量顯示）
 - 自動滾動控制
-- 快捷鍵w，打開shorts對應的影片界面，如https://www.youtube.com/shorts/9wRiG-A7K8A，本腳本可打開https://www.youtube.com/watch?v=9wRiG-A7K8A，在影片界面打開當前shorts
+- 快捷鍵w，手動打開shorts對應的影片界面，如https://www.youtube.com/shorts/9wRiG-A7K8A，本腳本可打開https://www.youtube.com/watch?v=9wRiG-A7K8A，在影片界面打開當前shorts
 
 ### 腳本推薦：[Tabview Youtube](https://greasyfork.org/zh-CN/scripts/428651-tabview-youtube)，最大的優點是能一邊看影片一邊看評論而不用來回的上下滾動，非常好用
 
-## 脚本特点
+## 腳本特點
 
 - <h3>沒有 setInterval 造成的性能問題，使用requestAnimationFrame，並且只渲染需要的部分，大大減少了性能消耗</h3>
 
-## 优化点
+## 最佳化點
 
 - <h3>解決在有廣告攔截插件及擴展的情況下該插件失效的問題</h3>
 - <h3>最佳化載入速度</h3>
 - <h3>解決從其他頁面（如用戶首頁，首頁的shorts欄等）進入的shorts不載入Better Youtube Shorts界面的問題</h3>
 
-## 脚本选项（在Tampermonkey / ViolentMonkey菜单中）
+## 腳本選項（在Tampermonkey / ViolentMonkey菜單中）
 
 ### 1. 選項 "Auto Switch To Video"
 
