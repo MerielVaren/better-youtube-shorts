@@ -22,7 +22,7 @@
 
 ## 腳本選項（在Tampermonkey / ViolentMonkey菜單中）
 
-### 1. 選項 "Auto Switch To Video"
+### 1. 選項 "Shorts Auto Switch To Video"
 
 - off: 不自動切換到影片界面
 - on: 自動切換到影片界面

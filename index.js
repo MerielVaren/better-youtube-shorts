@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.0.6
+// @version            2.0.7
 // @update             2024-07-06
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
@@ -23,6 +23,7 @@
 (async () => {
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
+
   const once = (fn) => {
     let done = false;
     let result;
@@ -80,22 +81,22 @@
     }
   });
 
-  let autoSwitchToVideo = await GM.getValue("autoSwitchToVideo");
-  if (autoSwitchToVideo === void 0) {
-    autoSwitchToVideo = false;
-    GM.setValue("autoSwitchToVideo", autoSwitchToVideo);
+  let shortsAutoSwitchToVideo = await GM.getValue("shortsAutoSwitchToVideo");
+  if (shortsAutoSwitchToVideo === void 0) {
+    shortsAutoSwitchToVideo = false;
+    GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
   }
   GM.registerMenuCommand(
-    `Auto Switch To Video: ${autoSwitchToVideo ? "on" : "off"}`,
+    `Shorts Auto Switch To Video: ${shortsAutoSwitchToVideo ? "on" : "off"}`,
     () => {
-      autoSwitchToVideo = !autoSwitchToVideo;
-      GM.setValue("autoSwitchToVideo", autoSwitchToVideo).then(
+      shortsAutoSwitchToVideo = !shortsAutoSwitchToVideo;
+      GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
         () => (location.href = location.href.replace("watch?v=", "shorts/"))
       );
     }
   );
 
-  if (autoSwitchToVideo && location.href.includes("youtube.com/shorts")) {
+  if (shortsAutoSwitchToVideo && location.href.includes("youtube.com/shorts")) {
     currentUrl = location.href = location.href.replace("shorts/", "watch?v=");
     return;
   }
@@ -805,14 +806,14 @@
     const destinationUrl = event?.destination?.url || "";
     if (destinationUrl.startsWith("about:blank")) return;
     const href = destinationUrl || location.href;
-    currentUrl = href;
-    if (autoSwitchToVideo && href.includes("youtube.com/shorts")) {
-      currentUrl = location.href = href.replace("shorts/", "watch?v=");
-      return;
-    }
-    const isShorts = href.includes("youtube.com/shorts");
-    if (isShorts) {
-      initialize();
+    if (href.includes("youtube.com/shorts")) {
+      if (shortsAutoSwitchToVideo) {
+        currentUrl = location.href = href.replace("shorts/", "watch?v=");
+        return;
+      } else {
+        currentUrl = href;
+        initialize();
+      }
     }
   };
   const historyWrap = (type) => {
