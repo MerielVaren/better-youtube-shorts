@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.0.2
+// @version            2.0.3
 // @description        Provides more control features for Youtube Shorts, including jumping to the corresponding video page, volume control, progress bar, auto-scroll, hotkeys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括跳转到对应视频页面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -19,7 +19,7 @@
 // @icon               https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
 
-(() => {
+(async () => {
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
   const once = (fn) => {
@@ -56,9 +56,9 @@
     return false;
   };
 
-  const infoFn = once(async (video, reel) => {
+  const infoFn = once(async (reel) => {
     const version = await GM.getValue("version");
-    const shouldNotifyUserAboutChanges = true;
+    const shouldNotifyUserAboutChanges = false;
     if (
       !version ||
       (typeof version === "string" &&
@@ -79,23 +79,25 @@
     }
   });
 
-  let shortsAutoSwitchToVideo;
-  (async () => {
-    shortsAutoSwitchToVideo = await GM.getValue("shortsAutoSwitchToVideo");
-    if (shortsAutoSwitchToVideo === void 0) {
-      shortsAutoSwitchToVideo = false;
-      GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
+  let autoSwitchToVideo = await GM.getValue("autoSwitchToVideo");
+  if (autoSwitchToVideo === void 0) {
+    autoSwitchToVideo = false;
+    GM.setValue("autoSwitchToVideo", autoSwitchToVideo);
+  }
+  GM.registerMenuCommand(
+    `Auto Switch To Video: ${autoSwitchToVideo ? "on" : "off"}`,
+    () => {
+      autoSwitchToVideo = !autoSwitchToVideo;
+      GM.setValue("autoSwitchToVideo", autoSwitchToVideo).then(
+        () => (location.href = location.href.replace("watch?v=", "shorts/"))
+      );
     }
-    GM.registerMenuCommand(
-      `Shorts Auto Switch To Video: ${shortsAutoSwitchToVideo ? "on" : "off"}`,
-      () => {
-        shortsAutoSwitchToVideo = !shortsAutoSwitchToVideo;
-        GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
-          () => location.href = location.href.replace("watch?v=", "shorts/")
-        );
-      }
-    );
-  })();
+  );
+
+  if (autoSwitchToVideo && location.href.includes("youtube.com/shorts")) {
+    currentUrl = location.href = location.href.replace("shorts/", "watch?v=");
+    return;
+  }
 
   const initialize = once(async () => {
     GM.addStyle(
@@ -559,7 +561,7 @@
       shortsPlayerControls?.remove();
       scrubber?.remove();
 
-      infoFn(video, reel);
+      infoFn(reel);
 
       if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
         const currentSec = Math.floor(video.currentTime);
@@ -803,7 +805,7 @@
     if (destinationUrl.startsWith("about:blank")) return;
     const href = destinationUrl || location.href;
     currentUrl = href;
-    if (shortsAutoSwitchToVideo && href.includes("youtube.com/shorts")) {
+    if (autoSwitchToVideo && href.includes("youtube.com/shorts")) {
       currentUrl = location.href = href.replace("shorts/", "watch?v=");
       return;
     }
