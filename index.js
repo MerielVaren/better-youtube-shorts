@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.0.7
+// @version            2.0.8
 // @update             2024-07-06
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
@@ -24,6 +24,11 @@
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
 
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
   const once = (fn) => {
     let done = false;
     let result;
@@ -36,13 +41,11 @@
   };
 
   const infoMainText = `BTYS Version ${GM.info.script.version}<br>
-    We have some fix for the new Youtube Shorts layout.<br>
-    Since youtube changed its own layout, we have to change our layout too.😑<br>
-    We have added support for the light mode, now you can use Better Youtube Shorts in light mode.🌞<br>
-    We added a new option: "Shorts Auto Switch To Video".📹<br>
-    Tired of watching shorts? Turn on this option and you will be redirected to the video page automatically.🔀<br>
-    If you have any feedback on the new UI, please leave a message in the Greasyfork feedback area.🍴<br>
-    DOUBLE CLICK this message to close it.👈<br>
+    We support the mobile version of YouTube Shorts now!🎉🎉🎉<br>
+    Now you can enjoy BYTS on the mobile web version, go for a try!📱<br>
+    Right now it's a beta version<br>
+    So features may not work as expected🐛<br>
+    Let us know if you find any bugs or have any suggestions🎩<br>
     `;
 
   const higherVersion = (v1, v2) => {
@@ -60,7 +63,7 @@
 
   const infoFn = once(async (reel) => {
     const version = await GM.getValue("version");
-    const shouldNotifyUserAboutChanges = false;
+    const shouldNotifyUserAboutChanges = true;
     if (
       !version ||
       (typeof version === "string" &&
@@ -540,266 +543,390 @@
     }
 
     async function updateVidElem() {
-      const currentVideo = document.querySelector(
-        "#shorts-player > div.html5-video-container > video"
-      );
-      if (video !== currentVideo) {
-        video = currentVideo;
-      }
-
-      if (constantVolume) {
-        video.volume = await GM.getValue("volume", 0);
-      }
-
-      const reel = document.querySelector("ytd-reel-video-renderer[is-active]");
-      if (reel === null) {
-        return;
-      }
-
-      const shortsPlayerControls = document.querySelector(
-        "#scrubber > ytd-scrubber > shorts-player-controls"
-      );
-      const scrubber = document.getElementById("scrubber");
-      shortsPlayerControls?.remove();
-      scrubber?.remove();
-
-      infoFn(reel);
-
-      if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
-        const currentSec = Math.floor(video.currentTime);
-        const shortsUrlList = location.href.split("/");
-        if (!shortsUrlList.includes("shorts")) return;
-        const shortsId = shortsUrlList.pop();
-
-        if (shortsId !== lastShortsId) {
-          lastShortsId = shortsId;
-          const checkpoint = shortsCheckpoints[shortsId] || 1e-6;
-          video.pause();
-          if (checkpoint + 1 >= video.duration) {
-            video.currentTime = 1e-6;
-          } else {
-            video.currentTime = checkpoint;
-          }
-          video.play();
+      if (!isMobile) {
+        const currentVideo = document.querySelector(
+          "#shorts-player > div.html5-video-container > video"
+        );
+        if (video !== currentVideo) {
+          video = currentVideo;
         }
 
-        if (currentSec !== lastCurSeconds && video.currentTime !== 0) {
-          lastCurSeconds = currentSec;
-          shortsCheckpoints[shortsId] = currentSec;
-          GM.setValue("shortsCheckpoints", shortsCheckpoints);
+        if (constantVolume) {
+          video.volume = await GM.getValue("volume", 0);
         }
-      }
 
-      if (operationMode === "Shorts") {
-        document.removeEventListener("keydown", videoOperationMode, {
-          capture: true,
-        });
-        document.addEventListener("keydown", shortsOperationMode, {});
-      } else {
-        document.removeEventListener("keydown", shortsOperationMode, {});
-        document.addEventListener("keydown", videoOperationMode, {
-          capture: true,
-        });
-      }
-
-      // Volume Slider
-      let volumeSliderDiv = document.getElementById("byts-vol-div");
-      let volumeSlider = document.getElementById("byts-vol");
-      let volumeTextDiv = document.getElementById("byts-vol-textdiv");
-      const reelVolumeSliderDiv = reel.querySelector("#byts-vol-div");
-      if (reelVolumeSliderDiv === null) {
-        if (volumeSliderDiv === null) {
-          volumeSliderDiv = document.createElement("div");
-          volumeSliderDiv.id = "byts-vol-div";
-          volumeSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 5px; margin-top: ${reel.offsetHeight}px;`;
-          volumeSlider = document.createElement("input");
-          volumeSlider.style.cssText = `user-select: none; width: 80px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
-          volumeSlider.type = "range";
-          volumeSlider.id = "byts-vol";
-          volumeSlider.className = "volslider";
-          volumeSlider.name = "vol";
-          volumeSlider.min = 0.0;
-          volumeSlider.max = 1.0;
-          volumeSlider.step = 0.01;
-          volumeSlider.value = video.volume;
-          volumeSlider.addEventListener("input", function () {
-            video.volume = this.value;
-            GM.setValue("volume", this.value);
-          });
-          volumeSliderDiv.appendChild(volumeSlider);
-          volumeTextDiv = document.createElement("div");
-          volumeTextDiv.id = "byts-vol-textdiv";
-          volumeTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: ${
-            isDarkMode ? "white" : "black"
-          }; font-size: 1.2rem; margin-left: ${volumeSlider.offsetWidth + 1}px`;
-          volumeTextDiv.textContent = `${(
-            video.volume.toFixed(2) * 100
-          ).toFixed()}%`;
-          volumeSliderDiv.appendChild(volumeTextDiv);
+        const reel = document.querySelector(
+          "ytd-reel-video-renderer[is-active]"
+        );
+        if (reel === null) {
+          return;
         }
-        reel.appendChild(volumeSliderDiv);
-        audioInitialized = true;
-      }
-      if (constantVolume) {
-        video.volume = volumeSlider.value;
-      }
-      volumeSlider.value = video.volume;
-      volumeTextDiv.textContent = `${(
-        video.volume.toFixed(2) * 100
-      ).toFixed()}%`;
-      volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
-      volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 1}px`;
 
-      // Progress Bar
-      let progressBar = document.getElementById("byts-progbar");
-      const reelProgressBar = reel.querySelector("#byts-progbar");
-      if (reelProgressBar === null) {
-        const builtinProgressbar = reel.querySelector("#progress-bar");
-        if (builtinProgressbar !== null) {
-          builtinProgressbar.remove();
-        }
-        if (progressBar === null) {
-          progressBar = document.createElement("div");
-          progressBar.id = "byts-progbar";
-          progressBar.style.cssText = `user-select: none; cursor: pointer; width: 98%; height: 7px; background-color: #343434; position: absolute; border-radius: 10px; margin-top: ${
-            reel.offsetHeight - 7
-          }px;`;
-        }
-        reel.appendChild(progressBar);
+        const shortsPlayerControls = document.querySelector(
+          "#scrubber > ytd-scrubber > shorts-player-controls"
+        );
+        const scrubber = document.getElementById("scrubber");
+        shortsPlayerControls?.remove();
+        scrubber?.remove();
 
-        let wasPausedBeforeDrag = false;
-        progressBar.addEventListener("mousedown", function (e) {
-          seekMouseDown = true;
-          wasPausedBeforeDrag = video.paused;
-          setVideoPlaybackTime(e, progressBar);
-          video.pause();
-        });
-        document.addEventListener("mousemove", function (e) {
-          if (!seekMouseDown) return;
-          e.preventDefault();
-          setVideoPlaybackTime(e, progressBar);
-          if (!video.paused) {
+        infoFn(reel);
+
+        if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
+          const currentSec = Math.floor(video.currentTime);
+          const shortsUrlList = location.href.split("/");
+          if (!shortsUrlList.includes("shorts")) return;
+          const shortsId = shortsUrlList.pop();
+
+          if (shortsId !== lastShortsId) {
+            lastShortsId = shortsId;
+            const checkpoint = shortsCheckpoints[shortsId] || 1e-6;
             video.pause();
-          }
-          e.preventDefault();
-        });
-        document.addEventListener("mouseup", function () {
-          if (!seekMouseDown) return;
-          seekMouseDown = false;
-          if (!wasPausedBeforeDrag) {
+            if (checkpoint + 1 >= video.duration) {
+              video.currentTime = 1e-6;
+            } else {
+              video.currentTime = checkpoint;
+            }
             video.play();
           }
-        });
-      }
-      progressBar.style.marginTop = `${reel.offsetHeight - 7}px`;
 
-      // Progress Bar (Inner Red Bar)
-      const progressTime = (video.currentTime / video.duration) * 100;
-      let InnerProgressBar = progressBar.querySelector("#byts-progress");
-      if (InnerProgressBar === null) {
-        InnerProgressBar = document.createElement("div");
-        InnerProgressBar.id = "byts-progress";
-        InnerProgressBar.style.cssText = `user-select: none; background-color: #FF0000; height: 100%; border-radius: 10px; width: ${progressTime}%;`;
-        progressBar.appendChild(InnerProgressBar);
-      }
-      InnerProgressBar.style.width = `${progressTime}%`;
+          if (currentSec !== lastCurSeconds && video.currentTime !== 0) {
+            lastCurSeconds = currentSec;
+            shortsCheckpoints[shortsId] = currentSec;
+            GM.setValue("shortsCheckpoints", shortsCheckpoints);
+          }
+        }
 
-      // Time Info
-      const durSecs = Math.floor(video.duration);
-      const durMinutes = Math.floor(durSecs / 60);
-      const durSeconds = durSecs % 60;
-      const curSecs = Math.floor(video.currentTime);
+        if (operationMode === "Shorts") {
+          document.removeEventListener("keydown", videoOperationMode, {
+            capture: true,
+          });
+          document.addEventListener("keydown", shortsOperationMode, {});
+        } else {
+          document.removeEventListener("keydown", shortsOperationMode, {});
+          document.addEventListener("keydown", videoOperationMode, {
+            capture: true,
+          });
+        }
 
-      let timeInfo = document.getElementById("byts-timeinfo");
-      let timeInfoText = document.getElementById("byts-timeinfo-textdiv");
-      const reelTimeInfo = reel.querySelector("#byts-timeinfo");
-
-      if (!Number.isNaN(durSecs) && reelTimeInfo !== null) {
-        timeInfoText.textContent = `${Math.floor(curSecs / 60)}:${padTo2Digits(
-          curSecs % 60
-        )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
-      }
-      if (curSecs !== lastCurSeconds || reelTimeInfo === null) {
-        lastCurSeconds = curSecs;
-        const curMinutes = Math.floor(curSecs / 60);
-        const curSeconds = curSecs % 60;
-
-        if (reelTimeInfo === null) {
-          if (timeInfo === null) {
-            timeInfo = document.createElement("div");
-            timeInfo.id = "byts-timeinfo";
-            timeInfo.style.cssText = `user-select: none; display: flex; right: auto; left: auto; position: absolute; margin-top: ${
-              reel.offsetHeight - 2
-            }px;`;
-            timeInfoText = document.createElement("div");
-            timeInfoText.id = "byts-timeinfo-textdiv";
-            timeInfoText.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
+        // Volume Slider
+        let volumeSliderDiv = document.getElementById("byts-vol-div");
+        let volumeSlider = document.getElementById("byts-vol");
+        let volumeTextDiv = document.getElementById("byts-vol-textdiv");
+        const reelVolumeSliderDiv = reel.querySelector("#byts-vol-div");
+        if (reelVolumeSliderDiv === null) {
+          if (volumeSliderDiv === null) {
+            volumeSliderDiv = document.createElement("div");
+            volumeSliderDiv.id = "byts-vol-div";
+            volumeSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 5px; margin-top: ${reel.offsetHeight}px;`;
+            volumeSlider = document.createElement("input");
+            volumeSlider.style.cssText = `user-select: none; width: 80px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
+            volumeSlider.type = "range";
+            volumeSlider.id = "byts-vol";
+            volumeSlider.className = "volslider";
+            volumeSlider.name = "vol";
+            volumeSlider.min = 0.0;
+            volumeSlider.max = 1.0;
+            volumeSlider.step = 0.01;
+            volumeSlider.value = video.volume;
+            volumeSlider.addEventListener("input", function () {
+              video.volume = this.value;
+              GM.setValue("volume", this.value);
+            });
+            volumeSliderDiv.appendChild(volumeSlider);
+            volumeTextDiv = document.createElement("div");
+            volumeTextDiv.id = "byts-vol-textdiv";
+            volumeTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: ${
               isDarkMode ? "white" : "black"
-            }; font-size: 1.2rem;`;
+            }; font-size: 1.2rem; margin-left: ${
+              volumeSlider.offsetWidth + 1
+            }px`;
+            volumeTextDiv.textContent = `${(
+              video.volume.toFixed(2) * 100
+            ).toFixed()}%`;
+            volumeSliderDiv.appendChild(volumeTextDiv);
+          }
+          reel.appendChild(volumeSliderDiv);
+          audioInitialized = true;
+        }
+        if (constantVolume) {
+          video.volume = volumeSlider.value;
+        }
+        volumeSlider.value = video.volume;
+        volumeTextDiv.textContent = `${(
+          video.volume.toFixed(2) * 100
+        ).toFixed()}%`;
+        volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
+        volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 1}px`;
+
+        // Progress Bar
+        let progressBar = document.getElementById("byts-progbar");
+        const reelProgressBar = reel.querySelector("#byts-progbar");
+        if (reelProgressBar === null) {
+          const builtinProgressbar = reel.querySelector("#progress-bar");
+          if (builtinProgressbar !== null) {
+            builtinProgressbar.remove();
+          }
+          if (progressBar === null) {
+            progressBar = document.createElement("div");
+            progressBar.id = "byts-progbar";
+            progressBar.style.cssText = `user-select: none; cursor: pointer; width: 98%; height: 7px; background-color: #343434; position: absolute; border-radius: 10px; margin-top: ${
+              reel.offsetHeight - 7
+            }px;`;
+          }
+          reel.appendChild(progressBar);
+
+          let wasPausedBeforeDrag = false;
+          progressBar.addEventListener("mousedown", function (e) {
+            seekMouseDown = true;
+            wasPausedBeforeDrag = video.paused;
+            setVideoPlaybackTime(e, progressBar);
+            video.pause();
+          });
+          document.addEventListener("mousemove", function (e) {
+            if (!seekMouseDown) return;
+            e.preventDefault();
+            setVideoPlaybackTime(e, progressBar);
+            if (!video.paused) {
+              video.pause();
+            }
+            e.preventDefault();
+          });
+          document.addEventListener("mouseup", function () {
+            if (!seekMouseDown) return;
+            seekMouseDown = false;
+            if (!wasPausedBeforeDrag) {
+              video.play();
+            }
+          });
+        }
+        progressBar.style.marginTop = `${reel.offsetHeight - 7}px`;
+
+        // Progress Bar (Inner Red Bar)
+        const progressTime = (video.currentTime / video.duration) * 100;
+        let InnerProgressBar = progressBar.querySelector("#byts-progress");
+        if (InnerProgressBar === null) {
+          InnerProgressBar = document.createElement("div");
+          InnerProgressBar.id = "byts-progress";
+          InnerProgressBar.style.cssText = `user-select: none; background-color: #FF0000; height: 100%; border-radius: 10px; width: ${progressTime}%;`;
+          progressBar.appendChild(InnerProgressBar);
+        }
+        InnerProgressBar.style.width = `${progressTime}%`;
+
+        // Time Info
+        const durSecs = Math.floor(video.duration);
+        const durMinutes = Math.floor(durSecs / 60);
+        const durSeconds = durSecs % 60;
+        const curSecs = Math.floor(video.currentTime);
+
+        let timeInfo = document.getElementById("byts-timeinfo");
+        let timeInfoText = document.getElementById("byts-timeinfo-textdiv");
+        const reelTimeInfo = reel.querySelector("#byts-timeinfo");
+
+        if (!Number.isNaN(durSecs) && reelTimeInfo !== null) {
+          timeInfoText.textContent = `${Math.floor(
+            curSecs / 60
+          )}:${padTo2Digits(curSecs % 60)} / ${durMinutes}:${padTo2Digits(
+            durSeconds
+          )}`;
+        }
+        if (curSecs !== lastCurSeconds || reelTimeInfo === null) {
+          lastCurSeconds = curSecs;
+          const curMinutes = Math.floor(curSecs / 60);
+          const curSeconds = curSecs % 60;
+
+          if (reelTimeInfo === null) {
+            if (timeInfo === null) {
+              timeInfo = document.createElement("div");
+              timeInfo.id = "byts-timeinfo";
+              timeInfo.style.cssText = `user-select: none; display: flex; right: auto; left: auto; position: absolute; margin-top: ${
+                reel.offsetHeight - 2
+              }px;`;
+              timeInfoText = document.createElement("div");
+              timeInfoText.id = "byts-timeinfo-textdiv";
+              timeInfoText.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
+                isDarkMode ? "white" : "black"
+              }; font-size: 1.2rem;`;
+              timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
+                curSeconds
+              )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
+              timeInfo.appendChild(timeInfoText);
+            }
+            reel.appendChild(timeInfo);
             timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
               curSeconds
             )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
-            timeInfo.appendChild(timeInfoText);
           }
-          reel.appendChild(timeInfo);
-          timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
-            curSeconds
-          )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
         }
-      }
-      timeInfo.style.marginTop = `${reel.offsetHeight - 2}px`;
+        timeInfo.style.marginTop = `${reel.offsetHeight - 2}px`;
 
-      // AutoScroll
-      let autoScrollDiv = document.getElementById("byts-autoscroll-div");
-      const reelAutoScrollDiv = reel.querySelector("#byts-autoscroll-div");
-      if (reelAutoScrollDiv === null) {
-        if (autoScrollDiv === null) {
-          autoScrollDiv = document.createElement("div");
-          autoScrollDiv.id = "byts-autoscroll-div";
-          autoScrollDiv.style.cssText = `user-select: none; display: flex; right: 0px; position: absolute; margin-top: ${
-            reel.offsetHeight - 3
-          }px;`;
-          const autoScrollTextDiv = document.createElement("div");
-          autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
-            isDarkMode ? "white" : "black"
-          }; font-size: 1.2rem;`;
-          autoScrollTextDiv.textContent = "Auto Scroll ";
-          autoScrollDiv.appendChild(autoScrollTextDiv);
-          const autoScrollSwitch = document.createElement("label");
-          autoScrollSwitch.className = "switch";
-          autoScrollSwitch.style.marginTop = "5px";
-          const autoscrollInput = document.createElement("input");
-          autoscrollInput.id = "byts-autoscroll-input";
-          autoscrollInput.type = "checkbox";
-          autoscrollInput.checked = autoScroll;
-          autoscrollInput.addEventListener("input", function () {
-            autoScroll = this.checked;
-            GM.setValue("autoScroll", this.checked);
-          });
-          const autoScrollSlider = document.createElement("span");
-          autoScrollSlider.className = "slider round";
-          autoScrollSwitch.appendChild(autoscrollInput);
-          autoScrollSwitch.appendChild(autoScrollSlider);
-          autoScrollDiv.appendChild(autoScrollSwitch);
+        // AutoScroll
+        let autoScrollDiv = document.getElementById("byts-autoscroll-div");
+        const reelAutoScrollDiv = reel.querySelector("#byts-autoscroll-div");
+        if (reelAutoScrollDiv === null) {
+          if (autoScrollDiv === null) {
+            autoScrollDiv = document.createElement("div");
+            autoScrollDiv.id = "byts-autoscroll-div";
+            autoScrollDiv.style.cssText = `user-select: none; display: flex; right: 0px; position: absolute; margin-top: ${
+              reel.offsetHeight - 3
+            }px;`;
+            const autoScrollTextDiv = document.createElement("div");
+            autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
+              isDarkMode ? "white" : "black"
+            }; font-size: 1.2rem;`;
+            autoScrollTextDiv.textContent = "Auto Scroll ";
+            autoScrollDiv.appendChild(autoScrollTextDiv);
+            const autoScrollSwitch = document.createElement("label");
+            autoScrollSwitch.className = "switch";
+            autoScrollSwitch.style.marginTop = "5px";
+            const autoscrollInput = document.createElement("input");
+            autoscrollInput.id = "byts-autoscroll-input";
+            autoscrollInput.type = "checkbox";
+            autoscrollInput.checked = autoScroll;
+            autoscrollInput.addEventListener("input", function () {
+              autoScroll = this.checked;
+              GM.setValue("autoScroll", this.checked);
+            });
+            const autoScrollSlider = document.createElement("span");
+            autoScrollSlider.className = "slider round";
+            autoScrollSwitch.appendChild(autoscrollInput);
+            autoScrollSwitch.appendChild(autoScrollSlider);
+            autoScrollDiv.appendChild(autoScrollSwitch);
+          }
+          reel.appendChild(autoScrollDiv);
         }
-        reel.appendChild(autoScrollDiv);
-      }
-      if (autoScroll === true) {
-        video.removeAttribute("loop");
-        video.removeEventListener("ended", navigationButtonDown);
-        video.addEventListener("ended", navigationButtonDown);
-      } else {
-        if (loopPlayback) {
-          video.setAttribute("loop", true);
-          video.removeEventListener("ended", navigationButtonDown);
-        } else {
+        if (autoScroll === true) {
           video.removeAttribute("loop");
           video.removeEventListener("ended", navigationButtonDown);
+          video.addEventListener("ended", navigationButtonDown);
+        } else {
+          if (loopPlayback) {
+            video.setAttribute("loop", true);
+            video.removeEventListener("ended", navigationButtonDown);
+          } else {
+            video.removeAttribute("loop");
+            video.removeEventListener("ended", navigationButtonDown);
+          }
         }
+        autoScrollDiv.style.marginTop = `${reel.offsetHeight - 3}px`;
+        autoScrollSlider.style.marginTop = `0px`;
+        autoScrollSwitch.style.marginTop = "5px";
+      } else {
+        const reel = document.querySelector(
+          "ytm-reel-player-overlay-renderer[data-is-active='true']"
+        );
+        if (reel === null) {
+          return;
+        }
+        const currentVideo = document.querySelector("video");
+        if (video !== currentVideo) {
+          video = currentVideo;
+        }
+        const touchControls = document.querySelector(
+          "div.layer.touch-controls > div"
+        );
+        touchControls?.remove();
+
+        infoFn(reel);
+
+        // Progress Bar
+        let progressBar = document.getElementById("byts-progbar");
+        const reelProgressBar = reel.querySelector("#byts-progbar");
+        if (reelProgressBar === null) {
+          const builtinProgressbar = reel.querySelector("#progress-bar");
+          if (builtinProgressbar !== null) {
+            builtinProgressbar.remove();
+          }
+          if (progressBar === null) {
+            progressBar = document.createElement("div");
+            progressBar.id = "byts-progbar";
+            progressBar.style.cssText = `user-select: none; cursor: pointer; width: 98%; left: 3px; height: 10px; background-color: #343434; position: absolute; border-radius: 10px; margin-top: ${
+              reel.offsetHeight - 7
+            }px;`;
+          }
+          reel.appendChild(progressBar);
+
+          let wasPausedBeforeDrag = false;
+          progressBar.addEventListener("mousedown", function (e) {
+            seekMouseDown = true;
+            wasPausedBeforeDrag = video.paused;
+            setVideoPlaybackTime(e, progressBar);
+            video.pause();
+          });
+          document.addEventListener("mousemove", function (e) {
+            if (!seekMouseDown) return;
+            e.preventDefault();
+            setVideoPlaybackTime(e, progressBar);
+            if (!video.paused) {
+              video.pause();
+            }
+            e.preventDefault();
+          });
+          document.addEventListener("mouseup", function () {
+            if (!seekMouseDown) return;
+            seekMouseDown = false;
+            if (!wasPausedBeforeDrag) {
+              video.play();
+            }
+          });
+        }
+        progressBar.style.marginTop = `${reel.offsetHeight - 7}px`;
+
+        // Progress Bar (Inner Red Bar)
+        const progressTime = (video.currentTime / video.duration) * 100;
+        let innerProgressBar = progressBar.querySelector("#byts-progress");
+        if (innerProgressBar === null) {
+          innerProgressBar = document.createElement("div");
+          innerProgressBar.id = "byts-progress";
+          innerProgressBar.style.cssText = `user-select: none; background-color: #FF0000; height: 100%; border-radius: 10px; width: ${progressTime}%;`;
+          progressBar.appendChild(innerProgressBar);
+        }
+        innerProgressBar.style.width = `${progressTime}%`;
+
+        // Time Info
+        const durSecs = Math.floor(video.duration);
+        const durMinutes = Math.floor(durSecs / 60);
+        const durSeconds = durSecs % 60;
+        const curSecs = Math.floor(video.currentTime);
+
+        let timeInfo = document.getElementById("byts-timeinfo");
+        let timeInfoText = document.getElementById("byts-timeinfo-textdiv");
+        const reelTimeInfo = reel.querySelector("#byts-timeinfo");
+
+        if (!Number.isNaN(durSecs) && reelTimeInfo !== null) {
+          timeInfoText.textContent = `${Math.floor(
+            curSecs / 60
+          )}:${padTo2Digits(curSecs % 60)} / ${durMinutes}:${padTo2Digits(
+            durSeconds
+          )}`;
+        }
+        if (curSecs !== lastCurSeconds || reelTimeInfo === null) {
+          lastCurSeconds = curSecs;
+          const curMinutes = Math.floor(curSecs / 60);
+          const curSeconds = curSecs % 60;
+
+          if (reelTimeInfo === null) {
+            if (timeInfo === null) {
+              timeInfo = document.createElement("div");
+              timeInfo.id = "byts-timeinfo";
+              timeInfo.style.cssText = `user-select: none; display: flex; right: auto; left: auto; position: absolute; margin-top: ${
+                reel.offsetHeight - 2
+              }px;`;
+              timeInfoText = document.createElement("div");
+              timeInfoText.id = "byts-timeinfo-textdiv";
+              timeInfoText.style.cssText = `display: flex; justify-content: center; width: 386px; height: 11px; color: white; font-size: 1rem;`;
+              timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
+                curSeconds
+              )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
+              timeInfo.appendChild(timeInfoText);
+            }
+            reel.appendChild(timeInfo);
+            timeInfoText.textContent = `${curMinutes}:${padTo2Digits(
+              curSeconds
+            )} / ${durMinutes}:${padTo2Digits(durSeconds)}`;
+          }
+        }
+        timeInfo.style.marginTop = `${reel.offsetHeight - 2}px`;
       }
-      autoScrollDiv.style.marginTop = `${reel.offsetHeight - 3}px`;
-      autoScrollSlider.style.marginTop = `0px`;
-      autoScrollSwitch.style.marginTop = "5px";
     }
   });
   const urlChange = (event) => {
@@ -816,22 +943,11 @@
       }
     }
   };
-  const historyWrap = (type) => {
-    const origin = unsafeWindow.history[type];
-    const event = new Event(type);
-    return () => {
-      const rv = origin(...arguments);
-      event.arguments = arguments;
-      unsafeWindow.dispatchEvent(event);
-      return rv;
-    };
-  };
   urlChange();
+
   unsafeWindow?.navigation?.addEventListener("navigate", urlChange);
-  unsafeWindow.history.pushState = historyWrap("pushState");
-  unsafeWindow.history.replaceState = historyWrap("replaceState");
   unsafeWindow.addEventListener("replaceState", urlChange);
-  unsafeWindow.addEventListener("pushstate", urlChange);
-  unsafeWindow.addEventListener("popstate", urlChange);
+  unsafeWindow.addEventListener("pushState", urlChange);
+  unsafeWindow.addEventListener("popState", urlChange);
   unsafeWindow.addEventListener("hashchange", urlChange);
 })();
