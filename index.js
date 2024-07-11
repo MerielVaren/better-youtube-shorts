@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.1.1
+// @version            2.1.2
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -11,10 +11,10 @@
 // @match              *://*.youtube.com/*
 // @exclude            *://music.youtube.com/*
 // @run-at             document-start
-// @grant              GM_addStyle
-// @grant              GM_registerMenuCommand
-// @grant              GM_getValue
-// @grant              GM_setValue
+// @grant              GM.addStyle
+// @grant              GM.registerMenuCommand
+// @grant              GM.getValue
+// @grant              GM.setValue
 // @grant              GM_info
 // @license            MIT
 // @icon               https://www.google.com/s2/favicons?sz=64&domain=youtube.com
@@ -63,7 +63,7 @@
   };
 
   const infoFn = once(async (reel) => {
-    const version = await GM_getValue("version");
+    const version = await GM.getValue("version");
     const shouldNotifyUserAboutChanges = true;
     if (
       !version ||
@@ -71,7 +71,7 @@
         higherVersion(GM_info.script.version, version) &&
         shouldNotifyUserAboutChanges)
     ) {
-      GM_setValue("version", GM_info.script.version);
+      GM.setValue("version", GM_info.script.version);
       const info = document.createElement("div");
       info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
       const infoText = document.createElement("div");
@@ -85,16 +85,16 @@
     }
   });
 
-  let shortsAutoSwitchToVideo = await GM_getValue("shortsAutoSwitchToVideo");
+  let shortsAutoSwitchToVideo = await GM.getValue("shortsAutoSwitchToVideo");
   if (shortsAutoSwitchToVideo === void 0) {
     shortsAutoSwitchToVideo = false;
-    GM_setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
+    GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
   }
-  GM_registerMenuCommand(
+  GM.registerMenuCommand(
     `Shorts Auto Switch To Video: ${shortsAutoSwitchToVideo ? "on" : "off"}`,
     () => {
       shortsAutoSwitchToVideo = !shortsAutoSwitchToVideo;
-      GM_setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
+      GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
         () => (location.href = location.href.replace("watch?v=", "shorts/"))
       );
     }
@@ -106,7 +106,7 @@
   }
 
   const initialize = once(async () => {
-    GM_addStyle(
+    GM.addStyle(
       `input[type="range"].volslider {
           height: 12px;
           -webkit-appearance: none;
@@ -190,71 +190,71 @@
     let seekMouseDown = false;
     let lastCurSeconds = 0;
     let video = null;
-    let autoScroll = await GM_getValue("autoScroll");
-    let loopPlayback = await GM_getValue("loopPlayback");
-    let constantVolume = await GM_getValue("constantVolume");
-    let operationMode = await GM_getValue("operationMode");
-    let openWatchInCurrentTab = await GM_getValue("openWatchInCurrentTab");
+    let autoScroll = await GM.getValue("autoScroll");
+    let loopPlayback = await GM.getValue("loopPlayback");
+    let constantVolume = await GM.getValue("constantVolume");
+    let operationMode = await GM.getValue("operationMode");
+    let openWatchInCurrentTab = await GM.getValue("openWatchInCurrentTab");
     const checkpointStatusEnum = Object.freeze({
       OFF: 0,
       TEMPORARY: 1,
       PERMANENT: 2,
     });
-    let continueFromLastCheckpoint = await GM_getValue(
+    let continueFromLastCheckpoint = await GM.getValue(
       "continueFromLastCheckpoint"
     );
     let lastShortsId = "";
 
     if (autoScroll === void 0) {
       autoScroll = true;
-      GM_setValue("autoScroll", autoScroll);
+      GM.setValue("autoScroll", autoScroll);
     }
     if (constantVolume === void 0) {
       constantVolume = false;
-      GM_setValue("constantVolume", constantVolume);
+      GM.setValue("constantVolume", constantVolume);
     }
     if (operationMode === void 0) {
       operationMode = "Shorts";
-      GM_setValue("operationMode", operationMode);
+      GM.setValue("operationMode", operationMode);
     }
     if (continueFromLastCheckpoint === void 0) {
       continueFromLastCheckpoint = checkpointStatusEnum.OFF;
-      GM_setValue("continueFromLastCheckpoint", continueFromLastCheckpoint);
+      GM.setValue("continueFromLastCheckpoint", continueFromLastCheckpoint);
     }
     if (loopPlayback === void 0) {
       loopPlayback = true;
-      GM_setValue("loopPlayback", loopPlayback);
+      GM.setValue("loopPlayback", loopPlayback);
     }
     if (openWatchInCurrentTab === void 0) {
       openWatchInCurrentTab = false;
-      GM_setValue("openWatchInCurrentTab", openWatchInCurrentTab);
+      GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab);
     }
     let shortsCheckpoints;
     if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
-      shortsCheckpoints = await GM_getValue("shortsCheckpoints");
+      shortsCheckpoints = await GM.getValue("shortsCheckpoints");
       if (
         shortsCheckpoints === void 0 ||
         continueFromLastCheckpoint === checkpointStatusEnum.TEMPORARY
       ) {
         shortsCheckpoints = {};
-        GM_setValue("shortsCheckpoints", shortsCheckpoints);
+        GM.setValue("shortsCheckpoints", shortsCheckpoints);
       }
     }
 
-    GM_registerMenuCommand(
+    GM.registerMenuCommand(
       `Constant Volume: ${constantVolume ? "on" : "off"}`,
       () => {
         constantVolume = !constantVolume;
-        GM_setValue("constantVolume", constantVolume).then(() =>
+        GM.setValue("constantVolume", constantVolume).then(() =>
           location.reload()
         );
       }
     );
-    GM_registerMenuCommand(`Operating Mode: ${operationMode}`, () => {
+    GM.registerMenuCommand(`Operating Mode: ${operationMode}`, () => {
       operationMode = operationMode === "video" ? "shorts" : "video";
-      GM_setValue("operationMode", operationMode).then(() => location.reload());
+      GM.setValue("operationMode", operationMode).then(() => location.reload());
     });
-    GM_registerMenuCommand(
+    GM.registerMenuCommand(
       `Continue From Last Checkpoint: ${Object.keys(checkpointStatusEnum)
         .find(
           (key) => checkpointStatusEnum[key] === continueFromLastCheckpoint % 3
@@ -262,24 +262,24 @@
         .toLowerCase()}`,
       () => {
         continueFromLastCheckpoint = (continueFromLastCheckpoint + 1) % 3;
-        GM_setValue(
+        GM.setValue(
           "continueFromLastCheckpoint",
           continueFromLastCheckpoint
         ).then(() => location.reload());
       }
     );
-    GM_registerMenuCommand(
+    GM.registerMenuCommand(
       `Loop Playback: ${loopPlayback ? "on" : "off"}`,
       () => {
         loopPlayback = !loopPlayback;
-        GM_setValue("loopPlayback", loopPlayback).then(() => location.reload());
+        GM.setValue("loopPlayback", loopPlayback).then(() => location.reload());
       }
     );
-    GM_registerMenuCommand(
+    GM.registerMenuCommand(
       `Open Watch in Current Tab: ${openWatchInCurrentTab ? "on" : "off"}`,
       () => {
         openWatchInCurrentTab = !openWatchInCurrentTab;
-        GM_setValue("openWatchInCurrentTab", openWatchInCurrentTab).then(() =>
+        GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab).then(() =>
           location.reload()
         );
       }
@@ -301,7 +301,7 @@
               observer.disconnect();
               video = node;
               if (constantVolume) {
-                video.volume = await GM_getValue("volume", 0);
+                video.volume = await GM.getValue("volume", 0);
               }
               addShortcuts();
               updateVidElemWithRAF();
@@ -553,7 +553,7 @@
         }
 
         if (constantVolume) {
-          video.volume = await GM_getValue("volume", 0);
+          video.volume = await GM.getValue("volume", 0);
         }
 
         const reel = document.querySelector(
@@ -593,7 +593,7 @@
           if (currentSec !== lastCurSeconds && video.currentTime !== 0) {
             lastCurSeconds = currentSec;
             shortsCheckpoints[shortsId] = currentSec;
-            GM_setValue("shortsCheckpoints", shortsCheckpoints);
+            GM.setValue("shortsCheckpoints", shortsCheckpoints);
           }
         }
 
@@ -631,7 +631,7 @@
             volumeSlider.value = video.volume;
             volumeSlider.addEventListener("input", function () {
               video.volume = this.value;
-              GM_setValue("volume", this.value);
+              GM.setValue("volume", this.value);
             });
             volumeSliderDiv.appendChild(volumeSlider);
             volumeTextDiv = document.createElement("div");
@@ -785,7 +785,7 @@
             autoscrollInput.checked = autoScroll;
             autoscrollInput.addEventListener("input", function () {
               autoScroll = this.checked;
-              GM_setValue("autoScroll", this.checked);
+              GM.setValue("autoScroll", this.checked);
             });
             const autoScrollSlider = document.createElement("span");
             autoScrollSlider.className = "slider round";
