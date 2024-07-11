@@ -38,22 +38,17 @@
 - temporary: 記憶每個shorts最後的位置，再一次回到這個shorts時從上一次離開的位置繼續（每一次網頁刷新，這些記憶被都會重設）
 - permanent：網頁刷新不會再重設這些記憶
 
-### 4. 選項 "Volume Style"
-
-- dot: 音量條滑塊變為一個點
-- speaker: 音量條滑塊變為一個揚聲器
-
-### 5. 選項 "Constant Volume"
+### 4. 選項 "Constant Volume"
 
 - off: 使用youtube對shorts使用的默認音量邏輯，每個影片都有自己的音量
 - on: 所有瀏覽的shorts都採用用戶在音量條上設置的音量
 
-### 6. 選項 "Open Watch In Current Tab"（該選項在ShortsAutoSwitchToVideo為off，即停留在shorts界面時才有效）
+### 5. 選項 "Open Watch In Current Tab"（該選項在ShortsAutoSwitchToVideo為off，即停留在shorts界面時才有效）
 
 - off: 在新標籤頁打開當前shorts對應的watch界面
 - on: 在當前標籤頁打開shorts對應的watch界面
 
-### 7. 選項 "Operation Mode"
+### 6. 選項 "Operation Mode"
 
 - Video (Yotube影片採用的快捷鍵，加上shift控制滾動影片)
   - 上/下箭頭 - 音量減小/增大
