@@ -48,7 +48,12 @@
 - off: 在新標籤頁打開當前shorts對應的watch界面
 - on: 在當前標籤頁打開shorts對應的watch界面
 
-### 6. 選項 "Operation Mode"
+### 6. 選項 "Double Click To Fullscreen"
+
+- off: 關閉雙擊全螢幕（以便相容其他插件在shorts上的雙擊操作）
+- on: 打開雙擊全螢幕
+
+### 7. 選項 "Operation Mode"
 
 - Video (Yotube影片採用的快捷鍵，加上shift控制滾動影片)
   - 上/下箭頭 - 音量減小/增大
