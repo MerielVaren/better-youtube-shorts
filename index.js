@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.1.2
+// @version            2.1.3
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -40,14 +40,12 @@
     };
   };
 
-  const infoMainText = `BTYS Version ${GM_info.script.version}<br>
-    We support the mobile version of YouTube Shorts now!🎉🎉🎉<br>
-    Now you can enjoy BYTS on the mobile web version, go for a try!📱<br>
-    Right now it's a beta version<br>
-    So features may not work as expected🐛<br>
-    Let us know if you find any bugs or have any suggestions🎩<br>
-    DOUBLE CLICK this message to close it👋<br>
+  const infoText = `BTYS Version ${GM_info.script.version}<br>
+    In order to be compatible with other plugin which contains double click functions<br>
+    we added the ability to control double-click full screen📱<br>
+    Now you can turn off this feature in the settings🎩<br>
     `;
+  const infoMainText = infoText + `Double click to close this message👆`;
 
   const higherVersion = (v1, v2) => {
     const v1Arr = v1.split(".");
@@ -195,6 +193,7 @@
     let constantVolume = await GM.getValue("constantVolume");
     let operationMode = await GM.getValue("operationMode");
     let openWatchInCurrentTab = await GM.getValue("openWatchInCurrentTab");
+    let doubleClickToFullscreen = await GM.getValue("doubleClickToFullscreen");
     const checkpointStatusEnum = Object.freeze({
       OFF: 0,
       TEMPORARY: 1,
@@ -240,6 +239,10 @@
         GM.setValue("shortsCheckpoints", shortsCheckpoints);
       }
     }
+    if (doubleClickToFullscreen === void 0) {
+      doubleClickToFullscreen = true;
+      GM.setValue("doubleClickToFullscreen", doubleClickToFullscreen);
+    }
 
     GM.registerMenuCommand(
       `Constant Volume: ${constantVolume ? "on" : "off"}`,
@@ -281,6 +284,15 @@
         openWatchInCurrentTab = !openWatchInCurrentTab;
         GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab).then(() =>
           location.reload()
+        );
+      }
+    );
+    GM.registerMenuCommand(
+      `Double Click to Fullscreen: ${doubleClickToFullscreen ? "on" : "off"}`,
+      () => {
+        doubleClickToFullscreen = !doubleClickToFullscreen;
+        GM.setValue("doubleClickToFullscreen", doubleClickToFullscreen).then(
+          () => location.reload()
         );
       }
     );
@@ -476,13 +488,15 @@
           }
         );
       }
-      video.addEventListener("dblclick", function () {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        } else {
-          document.getElementsByTagName("ytd-app")[0].requestFullscreen();
-        }
-      });
+      if (doubleClickToFullscreen) {
+        video.addEventListener("dblclick", function () {
+          if (document.fullscreenElement) {
+            document.exitFullscreen();
+          } else {
+            document.getElementsByTagName("ytd-app")[0].requestFullscreen();
+          }
+        });
+      }
       document.addEventListener("keydown", function (e) {
         if (
           e.key.toUpperCase() === "ENTER" ||
