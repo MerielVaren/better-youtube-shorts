@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.1.5
+// @version            2.1.6
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -41,9 +41,9 @@
   };
 
   const infoText = `BTYS Version ${GM_info.script.version}<br>
-    Fixed a bug that only occurs on Firefox.🛠️<br>
-    Now Firefox will automatically jump to the watch interface.😁<br>
-    WHY DOES GOOGLE ALWAYS HAVE PROBLEMS WITH FIREFOX???🤔<br>
+    fullscreen shortcut has been changed to Alt + Enter🛠️<br>
+    developers are blind without testers🫠<br>
+    so we need your feedback📢<br>
     `;
   const infoMainText = infoText + `Double click to close this message👆`;
 
@@ -509,10 +509,7 @@
         });
       }
       document.addEventListener("keydown", function (e) {
-        if (
-          e.key.toUpperCase() === "ENTER" ||
-          e.key.toUpperCase() === "NUMPADENTER"
-        ) {
+        if (e.altKey && e.key.toUpperCase() === "ENTER") {
           if (document.fullscreenElement) {
             document.exitFullscreen();
           } else {
