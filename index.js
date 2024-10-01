@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.1.6
+// @version            2.1.7
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -40,12 +40,24 @@
     };
   };
 
-  const infoText = `BTYS Version ${GM_info.script.version}<br>
+  const updateText = `BTYS Version ${GM_info.script.version}<br>
     fullscreen shortcut has been changed to Alt + Enter🛠️<br>
     developers are blind without testers🫠<br>
     so we need your feedback📢<br>
     `;
-  const infoMainText = infoText + `Double click to close this message👆`;
+  const updateMainText = updateText + `Double click to close this message👆`;
+  const newlyInstalledText = `BTYS Version ${GM_info.script.version}<br>
+    Welcome to Better YouTube Shorts🎉<br>
+    Please check the settings in the Tampermonkey menu🛠️<br>
+    This is an brief introduction to the shortcuts📢<br>
+    <br>
+    - Arrow Up/Down: Scroll up/down<br>
+    - Arrow Left/Right: Seek backward/forward<br>
+    - Shift + Arrow Up/Left: Volume up/backward<br>
+    - Shift + Arrow Down/Right: Volume down/forward<br>
+    - Alt + Enter: Toggle fullscreen<br>
+    - Alt + W: Open watch page in current tab<br>
+    `;
 
   const higherVersion = (v1, v2) => {
     const v1Arr = v1.split(".");
@@ -59,6 +71,23 @@
     }
     return false;
   };
+
+  const newInstallation = once(async (reel) => {
+    const version = await GM.getValue("version");
+    if (!version) {
+      GM.setValue("version", GM_info.script.version);
+      const info = document.createElement("div");
+      info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
+      const infoText = document.createElement("div");
+      infoText.style.cssText = `background-color: white; padding: 10px; border-radius: 10px; font-size: 1.5rem;`;
+      infoText.innerHTML = newlyInstalledText;
+      info.appendChild(infoText);
+      reel.appendChild(info);
+      info.addEventListener("dblclick", () => {
+        info.remove();
+      });
+    }
+  });
 
   const infoFn = once(async (reel) => {
     const version = await GM.getValue("version");
@@ -74,7 +103,7 @@
       info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
       const infoText = document.createElement("div");
       infoText.style.cssText = `background-color: white; padding: 10px; border-radius: 10px; font-size: 1.5rem;`;
-      infoText.innerHTML = infoMainText;
+      infoText.innerHTML = updateMainText;
       info.appendChild(infoText);
       reel.appendChild(info);
       info.addEventListener("dblclick", () => {
@@ -593,6 +622,7 @@
         scrubber?.remove();
 
         infoFn(reel);
+        newInstallation(reel);
 
         if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
           const currentSec = Math.floor(video.currentTime);
@@ -850,6 +880,7 @@
         touchControls?.remove();
 
         infoFn(reel);
+        newInstallation(reel);
 
         // Progress Bar
         let progressBar = document.getElementById("byts-progbar");
