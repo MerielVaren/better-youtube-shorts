@@ -51,12 +51,12 @@
     Please check the settings in the Tampermonkey menu🛠️<br>
     This is an brief introduction to the shortcuts📢<br>
     <br>
-    - Arrow Up/Down: Scroll up/down<br>
-    - Arrow Left/Right: Seek backward/forward<br>
-    - Shift + Arrow Up/Left: Volume up/backward<br>
-    - Shift + Arrow Down/Right: Volume down/forward<br>
-    - Alt + Enter: Toggle fullscreen<br>
-    - Alt + W: Open watch page in current tab<br>
+    Arrow Up/Down: Scroll up/down<br>
+    Arrow Left/Right: Seek backward/forward<br>
+    Shift + Arrow Up/Left: Volume up/backward<br>
+    Shift + Arrow Down/Right: Volume down/forward<br>
+    Alt + Enter: Toggle fullscreen<br>
+    Alt + W: Open watch page in current tab<br>
     `;
 
   const higherVersion = (v1, v2) => {
