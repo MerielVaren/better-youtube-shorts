@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.1.8
+// @version            2.1.9
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -41,13 +41,13 @@
   };
 
   const closeText = `<br>Double click to close this message👆`;
-  const updateText = `BTYS Version ${GM_info.script.version}<br>
-    fullscreen shortcut has been changed to Alt + Enter🛠️<br>
-    developers are blind without testers🫠<br>
-    so we need your feedback📢<br>
-    ${closeText}
-    `;
-  const newInstallationText = `
+  let updateText = `BTYS Version ${GM_info.script.version}<br>
+    In this version, We added a progress jump feature🎉<br>
+    Now you can jump to the corresponding progress by pressing numbers 0~9🔢<br>
+    Just like what you do in the YouTube videos🎥<br>
+    More features will be added in the future🛠️<br>
+  `;
+  let newInstallationText = `
     Welcome to Better YouTube Shorts🎉<br>
     Please check the settings in the Tampermonkey menu🛠️<br>
     There are more features in it📢<br>
@@ -59,8 +59,10 @@
     Shift + Arrow Down/Right: Volume down/forward<br>
     Alt + Enter: Toggle fullscreen<br>
     Alt + W: Open watch page in current tab<br>
-    ${closeText}
+    0~9: Jump to the corresponding progress<br>
     `;
+  updateText += closeText;
+  newInstallationText += closeText;
 
   const higherVersion = (v1, v2) => {
     const v1Arr = v1.split(".");
@@ -557,6 +559,14 @@
           } else {
             window.open(watchUrl, "_blank");
           }
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (
+          (e.key >= "0" && e.key <= "9") ||
+          (e.code >= "Numpad0" && e.code <= "Numpad9")
+        ) {
+          video.currentTime = video.duration * (e.key / 10);
         }
       });
     }
