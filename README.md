@@ -53,7 +53,11 @@
 - off: 關閉雙擊全螢幕（以便相容其他插件在shorts上的雙擊操作）
 - on: 打開雙擊全螢幕
 
-### 7. 選項 "Operation Mode"
+### 7. 選項 "Progress Bar Style"
+- original: 使用youtube原生的進度條
+- custom: 使用Better Youtube Shorts自定義的進度條
+
+### 8. 選項 "Operation Mode"
 
 - Video (Yotube影片採用的快捷鍵，加上shift控制滾動影片)
   - 上/下箭頭 - 音量減小/增大
