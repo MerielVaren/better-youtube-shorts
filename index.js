@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.2.2
+// @version            2.2.3
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -97,7 +97,7 @@
     }
   });
   const update = once(async (reel, video) => {
-    const shouldNotifyUserAboutChanges = true;
+    const shouldNotifyUserAboutChanges = false;
     if (
       typeof version === "string" &&
       higherVersion(GM_info.script.version, version) &&
@@ -749,6 +749,13 @@
       ).toFixed()}%`;
       volumeSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
       volumeTextDiv.style.marginLeft = `${volumeSlider.offsetWidth + 1}px`;
+      if (video.muted) {
+        volumeTextDiv.textContent = "0%";
+        volumeSlider.value = 0;
+      } else {
+        volumeTextDiv.textContent = `${(video.volume * 100).toFixed()}%`;
+        volumeSlider.value = video.volume;
+      }
 
       if (progressBarStyle === "custom") {
         // Progress Bar
