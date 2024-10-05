@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.2.1
+// @version            2.2.2
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -37,13 +37,10 @@
 
   const closeText = `<br>Double click to close this message👆`;
   let updateText = `BTYS Version ${GM_info.script.version}<br>
-    We add a red dot to the custom progress bar🔴<br>
-    Just as what the original progress bar does<br>
-    You can see it when you hover over the progress bar🖱️<br>
-    Also, now you can switch the progress bar style between original and custom🔧<br>
-    You can toggle it in the Tampermonkey menu🛠️<br>
-    Which means when you switch to the original progress bar📶<br>
-    All this script do is just enhance but not change🆙<br>
+    Added new features below👇<br><br>
+    1. add a tampermonkey menu to switch the progress bar style between original and custom🔧<br>
+    2. add a red dot to the custom progress bar when hovering over it🔴<br>
+    3. change the color of the volume slider and auto scroll switch to a more natural color🌈<br>
   `;
   let newInstallationText = `
     Welcome to Better YouTube Shorts🎉<br>
@@ -76,9 +73,14 @@
   };
 
   const version = await GM.getValue("version");
+  let interval;
   const newInstallation = once(async (reel, video) => {
     if (!version) {
-      video.pause();
+      if (!interval) {
+        interval = setInterval(() => {
+          video.pause();
+        }, 100);
+      }
       GM.setValue("version", GM_info.script.version);
       const info = document.createElement("div");
       info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
@@ -89,6 +91,7 @@
       reel.appendChild(info);
       info.addEventListener("dblclick", () => {
         info.remove();
+        clearInterval(interval);
         video.play();
       });
     }
@@ -100,7 +103,11 @@
       higherVersion(GM_info.script.version, version) &&
       shouldNotifyUserAboutChanges
     ) {
-      video.pause();
+      if (!interval) {
+        interval = setInterval(() => {
+          video.pause();
+        }, 100);
+      }
       GM.setValue("version", GM_info.script.version);
       const info = document.createElement("div");
       info.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.5); z-index: 999; margin: 5px 0; color: black; font-size: 2rem; font-weight: bold; text-align: center; border-radius: 10px; padding: 10px; box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5); transition: 0.5s;`;
@@ -111,6 +118,7 @@
       reel.appendChild(info);
       info.addEventListener("dblclick", () => {
         info.remove();
+        clearInterval(interval);
         video.play();
       });
     }
@@ -161,7 +169,7 @@
           height: 8px;
           cursor: pointer;
           box-shadow: 0px 0px 0px #000000;
-          background: #ccc;
+          background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
           border-radius: 25px;
         }
         input[type="range"].volslider::-webkit-slider-thumb {
@@ -190,7 +198,7 @@
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: #ccc;
+          background-color: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
           -webkit-transition: 0.4s;
           transition: 0.4s;
         }
