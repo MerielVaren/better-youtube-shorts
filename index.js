@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.2.3
+// @version            2.2.4
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -21,6 +21,138 @@
 // ==/UserScript==
 
 (async () => {
+  const userLanguage = navigator.language || navigator.userLanguage;
+  const i18nText = {
+    zhSimplified: {
+      closeText: `<br>双击关闭此消息👆`,
+      updateText: `BTYS 版本 ${GM_info.script.version}<br>
+        我们完善了语言的国际化💬<br>
+        现在支持简体中文，繁体中文和英文🌎<br>
+        如果需要支持更多语言<br>
+        请在tampemonkey的反馈区留言📝<br>
+      `,
+      newInstallationText: `
+        欢迎使用 Better YouTube Shorts🎉<br>
+        请检查 Tampermonkey 菜单中的设置🛠️<br>
+        里面还有更多功能📢<br>
+        下面是快捷键的说明👇<br>
+        <br>
+        箭头上/下: 向上/向下滚动<br>
+        箭头左/右: 后退/前进<br>
+        Shift + 箭头上/左: 音量增加/减少<br>
+        Shift + 箭头下/右: 音量减少/增加<br>
+        Alt + 回车: 切换全屏<br>
+        Alt + W: 在当前标签页中打开观看页面<br>
+        0~9: 跳转到对应的进度<br>
+      `,
+      on: "开启",
+      off: "关闭",
+      constantVolume: "恒定音量",
+      operationMode: "快捷键",
+      videoMode: "视频操作模式",
+      shortsMode: "短视频操作模式",
+      continueFromLastCheckpoint: "从上次检查点继续",
+      off: "关闭",
+      temporary: "临时保存",
+      permanent: "永久保存",
+      loopPlayback: "循环播放",
+      openWatchInCurrentTab: "在当前标签页中打开对应视频",
+      doubleClickToFullscreen: "双击全屏",
+      progressBarStyle: "进度条样式",
+      original: "原始",
+      custom: "自定义",
+      autoScroll: "自动滚动",
+      shortsAutoSwitchToVideo: "短视频自动切换到对应视频",
+    },
+    zhTraditional: {
+      closeText: `<br>雙擊關閉此消息👆`,
+      updateText: `BTYS 版本 ${GM_info.script.version}<br>
+        我們完善了語言的國際化💬<br>
+        現在支持繁體中文，簡體中文以及英文🌎<br>
+        如果需要支持更多語言<br>
+        請在tampemonkey的反饋區留言📝<br>
+      `,
+      newInstallationText: `
+        歡迎使用 Better YouTube Shorts🎉<br>
+        請檢查 Tampermonkey 菜單中的設置🛠️<br>
+        裡面還有更多功能📢<br>
+        下面是快捷鍵的說明👇<br>
+        <br>
+        箭頭上/下: 向上/向下滾動<br>
+        箭頭左/右: 後退/前進<br>
+        Shift + 箭頭上/左: 音量增加/減少<br>
+        Shift + 箭頭下/右: 音量減少/增加<br>
+        Alt + 回車: 切換全屏<br>
+        Alt + W: 在當前標籤頁中打開觀看頁面<br>
+        0~9: 跳轉到對應的進度<br>
+      `,
+      on: "開啟",
+      off: "關閉",
+      constantVolume: "恆定音量",
+      operationMode: "快捷鍵",
+      videoMode: "視頻操作模式",
+      shortsMode: "短視頻操作模式",
+      continueFromLastCheckpoint: "從上次檢查點繼續",
+      off: "關閉",
+      temporary: "臨時保存",
+      permanent: "永久保存",
+      loopPlayback: "循環播放",
+      openWatchInCurrentTab: "在當前標籤頁中打開對應視頻",
+      doubleClickToFullscreen: "雙擊全屏",
+      progressBarStyle: "進度條樣式",
+      original: "原始",
+      custom: "自定義",
+      autoScroll: "自動滾動",
+      shortsAutoSwitchToVideo: "短視頻自動切換到對應視頻",
+    },
+    en: {
+      closeText: `<br>Double click to close this message👆`,
+      updateText: `BTYS Version ${GM_info.script.version}<br>
+        We have improved the internationalization of languages💬<br>
+        Now supports English, Chinese Simplified, and Chinese Traditional🌎<br>
+        If you need support for more languages<br>
+        Please leave a message in the tampemonkey feedback area📝<br>
+      `,
+      newInstallationText: `
+        Welcome to Better YouTube Shorts🎉<br>
+        Please check the settings in the Tampermonkey menu🛠️<br>
+        There are more features in it📢<br>
+        Below is the explanation of the shortcut keys👇<br>
+        <br>
+        Arrow Up/Down: Scroll up/down<br>
+        Arrow Left/Right: Seek backward/forward<br>
+        Shift + Arrow Up/Left: Volume up/backward<br>
+        Shift + Arrow Down/Right: Volume down/forward<br>
+        Alt + Enter: Toggle fullscreen<br>
+        Alt + W: Open watch page in current tab<br>
+        0~9: Jump to the corresponding progress<br>
+      `,
+      on: "on",
+      off: "off",
+      constantVolume: "Constant Volume",
+      operationMode: "Operation Mode",
+      videoMode: "video operation mode",
+      shortsMode: "shorts operation mode",
+      continueFromLastCheckpoint: "Continue From Last Checkpoint",
+      off: "off",
+      temporary: "temporary",
+      permanent: "permanent",
+      loopPlayback: "Loop Playback",
+      openWatchInCurrentTab: "Open Watch in Current Tab",
+      doubleClickToFullscreen: "Double Click to Fullscreen",
+      progressBarStyle: "Progress Bar Style",
+      original: "original",
+      custom: "custom",
+      autoScroll: "Auto Scroll",
+      shortsAutoSwitchToVideo: "Shorts Auto Switch To Video",
+    },
+  };
+  const i18n = userLanguage.includes("zh")
+    ? userLanguage === "zh-CN" || userLanguage === "zh-SG"
+      ? i18nText["zhSimplified"]
+      : i18nText["zhTraditional"]
+    : i18nText["en"];
+
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
 
@@ -35,27 +167,9 @@
     };
   };
 
-  const closeText = `<br>Double click to close this message👆`;
-  let updateText = `BTYS Version ${GM_info.script.version}<br>
-    Added new features below👇<br><br>
-    1. add a tampermonkey menu to switch the progress bar style between original and custom🔧<br>
-    2. add a red dot to the custom progress bar when hovering over it🔴<br>
-    3. change the color of the volume slider and auto scroll switch to a more natural color🌈<br>
-  `;
-  let newInstallationText = `
-    Welcome to Better YouTube Shorts🎉<br>
-    Please check the settings in the Tampermonkey menu🛠️<br>
-    There are more features in it📢<br>
-    Below is the explanation of the shortcut keys👇<br>
-    <br>
-    Arrow Up/Down: Scroll up/down<br>
-    Arrow Left/Right: Seek backward/forward<br>
-    Shift + Arrow Up/Left: Volume up/backward<br>
-    Shift + Arrow Down/Right: Volume down/forward<br>
-    Alt + Enter: Toggle fullscreen<br>
-    Alt + W: Open watch page in current tab<br>
-    0~9: Jump to the corresponding progress<br>
-  `;
+  const closeText = i18n.closeText;
+  let updateText = i18n.updateText;
+  let newInstallationText = i18n.newInstallationText;
   updateText += closeText;
   newInstallationText += closeText;
 
@@ -97,7 +211,8 @@
     }
   });
   const update = once(async (reel, video) => {
-    const shouldNotifyUserAboutChanges = false;
+    const shouldNotifyUserAboutChanges = true;
+    GM.setValue("version", GM_info.script.version);
     if (
       typeof version === "string" &&
       higherVersion(GM_info.script.version, version) &&
@@ -130,7 +245,9 @@
     GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo);
   }
   GM.registerMenuCommand(
-    `Shorts Auto Switch To Video: ${shortsAutoSwitchToVideo ? "on" : "off"}`,
+    `${i18n.shortsAutoSwitchToVideo}: ${
+      shortsAutoSwitchToVideo ? i18n.on : i18n.off
+    }`,
     () => {
       shortsAutoSwitchToVideo = !shortsAutoSwitchToVideo;
       GM.setValue("shortsAutoSwitchToVideo", shortsAutoSwitchToVideo).then(
@@ -259,9 +376,9 @@
     let doubleClickToFullscreen = await GM.getValue("doubleClickToFullscreen");
     let progressBarStyle = await GM.getValue("progressBarStyle");
     const checkpointStatusEnum = Object.freeze({
-      OFF: 0,
-      TEMPORARY: 1,
-      PERMANENT: 2,
+      [i18n["off"]]: 0,
+      [i18n["temporary"]]: 1,
+      [i18n["permanent"]]: 2,
     });
     let continueFromLastCheckpoint = await GM.getValue(
       "continueFromLastCheckpoint"
@@ -313,7 +430,7 @@
     }
 
     GM.registerMenuCommand(
-      `Constant Volume: ${constantVolume ? "on" : "off"}`,
+      `${i18n.constantVolume}: ${constantVolume ? i18n.on : i18n.off}`,
       () => {
         constantVolume = !constantVolume;
         GM.setValue("constantVolume", constantVolume).then(() =>
@@ -321,12 +438,19 @@
         );
       }
     );
-    GM.registerMenuCommand(`Operating Mode: ${operationMode}`, () => {
-      operationMode = operationMode === "video" ? "shorts" : "video";
-      GM.setValue("operationMode", operationMode).then(() => location.reload());
-    });
     GM.registerMenuCommand(
-      `Continue From Last Checkpoint: ${Object.keys(checkpointStatusEnum)
+      `${i18n.operationMode}: ${
+        operationMode === "Video" ? i18n.videoMode : i18n.shortsMode
+      }`,
+      () => {
+        operationMode = operationMode === "Video" ? "Shorts" : "Video";
+        GM.setValue("operationMode", operationMode).then(() =>
+          location.reload()
+        );
+      }
+    );
+    GM.registerMenuCommand(
+      `${i18n.continueFromLastCheckpoint}: ${Object.keys(checkpointStatusEnum)
         .find(
           (key) => checkpointStatusEnum[key] === continueFromLastCheckpoint % 3
         )
@@ -340,14 +464,16 @@
       }
     );
     GM.registerMenuCommand(
-      `Loop Playback: ${loopPlayback ? "on" : "off"}`,
+      `${i18n.loopPlayback}: ${loopPlayback ? i18n.on : i18n.off}`,
       () => {
         loopPlayback = !loopPlayback;
         GM.setValue("loopPlayback", loopPlayback).then(() => location.reload());
       }
     );
     GM.registerMenuCommand(
-      `Open Watch in Current Tab: ${openWatchInCurrentTab ? "on" : "off"}`,
+      `${i18n.openWatchInCurrentTab}: ${
+        openWatchInCurrentTab ? i18n.on : i18n.off
+      }`,
       () => {
         openWatchInCurrentTab = !openWatchInCurrentTab;
         GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab).then(() =>
@@ -356,7 +482,9 @@
       }
     );
     GM.registerMenuCommand(
-      `Double Click to Fullscreen: ${doubleClickToFullscreen ? "on" : "off"}`,
+      `${i18n.doubleClickToFullscreen}: ${
+        doubleClickToFullscreen ? i18n.on : i18n.off
+      }`,
       () => {
         doubleClickToFullscreen = !doubleClickToFullscreen;
         GM.setValue("doubleClickToFullscreen", doubleClickToFullscreen).then(
@@ -364,12 +492,18 @@
         );
       }
     );
-    GM.registerMenuCommand(`Progress Bar Style: ${progressBarStyle}`, () => {
-      progressBarStyle = progressBarStyle === "custom" ? "original" : "custom";
-      GM.setValue("progressBarStyle", progressBarStyle).then(() =>
-        location.reload()
-      );
-    });
+    GM.registerMenuCommand(
+      `${i18n.progressBarStyle}: ${
+        progressBarStyle === "custom" ? i18n.custom : i18n.original
+      }`,
+      () => {
+        progressBarStyle =
+          progressBarStyle === "custom" ? "original" : "custom";
+        GM.setValue("progressBarStyle", progressBarStyle).then(() =>
+          location.reload()
+        );
+      }
+    );
 
     const observer = new MutationObserver(
       async (mutations, shortsReady = false, videoPlayerReady = false) => {
@@ -881,7 +1015,8 @@
           autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: 4px; color: ${
             isDarkMode ? "white" : "black"
           }; font-size: 1.2rem;`;
-          autoScrollTextDiv.textContent = "Auto Scroll ";
+          // autoScrollTextDiv.textContent = "Auto Scroll ";
+          autoScrollTextDiv.textContent = i18n.autoScroll;
           autoScrollDiv.appendChild(autoScrollTextDiv);
           const autoScrollSwitch = document.createElement("label");
           autoScrollSwitch.className = "switch";
