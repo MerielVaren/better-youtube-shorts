@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.2.5
+// @version            2.2.6
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -21,6 +21,7 @@
 // ==/UserScript==
 
 (async () => {
+  const shouldNotifyUserAboutChanges = false;
   const userLanguage = navigator.language || navigator.userLanguage;
   const i18nText = {
     zhSimplified: {
@@ -149,9 +150,9 @@
   };
   const i18n = userLanguage.includes("zh")
     ? userLanguage === "zh-CN" || userLanguage === "zh-SG"
-      ? i18nText["zhSimplified"]
-      : i18nText["zhTraditional"]
-    : i18nText["en"];
+      ? i18nText.zhSimplified
+      : i18nText.zhTraditional
+    : i18nText.en;
 
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
   let currentUrl = "";
@@ -188,12 +189,19 @@
 
   const version = await GM.getValue("version");
   let interval;
+  const checkVideoPaused = (video, waitTime = 100) => {
+    if (!video.paused) {
+      video.pause();
+      console.log("Video paused");
+      interval = setTimeout(() => checkVideoPaused(video, waitTime), waitTime);
+    } else {
+      clearTimeout(interval);
+    }
+  };
   const newInstallation = once(async (reel, video) => {
     if (!version) {
       if (!interval) {
-        interval = setInterval(() => {
-          video.pause();
-        }, 100);
+        interval = setTimeout(() => checkVideoPaused(video, 100), 100);
       }
       GM.setValue("version", GM_info.script.version);
       const info = document.createElement("div");
@@ -205,13 +213,11 @@
       reel.appendChild(info);
       info.addEventListener("dblclick", () => {
         info.remove();
-        clearInterval(interval);
         video.play();
       });
     }
   });
   const update = once(async (reel, video) => {
-    const shouldNotifyUserAboutChanges = true;
     GM.setValue("version", GM_info.script.version);
     if (
       typeof version === "string" &&
@@ -219,9 +225,7 @@
       shouldNotifyUserAboutChanges
     ) {
       if (!interval) {
-        interval = setInterval(() => {
-          video.pause();
-        }, 100);
+        interval = setTimeout(() => checkVideoPaused(video, 100), 100);
       }
       GM.setValue("version", GM_info.script.version);
       const info = document.createElement("div");
@@ -233,7 +237,6 @@
       reel.appendChild(info);
       info.addEventListener("dblclick", () => {
         info.remove();
-        clearInterval(interval);
         video.play();
       });
     }
@@ -275,94 +278,111 @@
   const initialize = once(async () => {
     GM.addStyle(
       `input[type="range"].volslider {
-          height: 12px;
-          -webkit-appearance: none;
-          margin: 10px 0;
-        }
-        input[type="range"].volslider:focus {
-          outline: none;
-        }
-        input[type="range"].volslider::-webkit-slider-runnable-track {
-          height: 8px;
-          cursor: pointer;
-          box-shadow: 0px 0px 0px #000000;
-          background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
-          border-radius: 25px;
-        }
-        input[type="range"].volslider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          width: 12px;
-          height: 12px;
-          margin-top: -2px;
-          border-radius: 50%;
-          background: ${isDarkMode ? "white" : "black"};
-        }
-        .switch {
-          position: relative;
-          display: inline-block;
-          width: 40px;
-          height: 12px;
-        }
-        .switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-        .slider {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
-          -webkit-transition: 0.4s;
-          transition: 0.4s;
-        }
-        .slider:before {
-          position: absolute;
-          content: "";
-          height: 12px;
-          width: 12px;
-          left: 0px;
-          bottom: 0px;
-          background-color: ${isDarkMode ? "white" : "black"};
-          -webkit-transition: 0.4s;
-          transition: 0.4s;
-        }
-        input:checked + .slider {
-          background-color: #ff0000;
-        }
-        input:focus + .slider {
-          box-shadow: 0 0 0px #ff0000;
-        }
-        input:checked + .slider:before {
-          -webkit-transform: translateX(29px);
-          -ms-transform: translateX(29px);
-          transform: translateX(29px);
-        }
-        /* Rounded sliders */
-        .slider.round {
-          border-radius: 12px;
-        }
-        .slider.round:before {
-          border-radius: 50%;
-        }
-        /* red progress bar */
-        #byts-progbar:hover #byts-progress::after,
-        #byts-progbar.show-dot #byts-progress::after {
-          content: '';
-          position: absolute;
-          top: 50%;
-          right: 0;
-          transform: translate(50%, -50%);
-          width: 15px;
-          height: 15px;
-          background-color: #FF0000;
-          border-radius: 50%;
-          display: block;
-        }
-        `
+        height: 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none; /* Firefox */
+        appearance: none;
+        margin: 10px 0;
+      }
+      input[type="range"].volslider:focus {
+        outline: none;
+      }
+      input[type="range"].volslider::-webkit-slider-runnable-track {
+        height: 8px;
+        cursor: pointer;
+        box-shadow: 0px 0px 0px #000000;
+        background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
+        border-radius: 25px;
+      }
+      input[type="range"].volslider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        margin-top: -2px;
+        border-radius: 50%;
+        background: ${isDarkMode ? "white" : "black"};
+      }
+      /* Firefox */
+      input[type="range"].volslider::-moz-range-track {
+        height: 8px;
+        cursor: pointer;
+        box-shadow: 0px 0px 0px #000000;
+        background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
+        border-radius: 25px;
+      }
+      input[type="range"].volslider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        border: none;
+        border-radius: 50%;
+        background: ${isDarkMode ? "white" : "black"};
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 12px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 12px;
+        width: 12px;
+        left: 0px;
+        bottom: 0px;
+        background-color: ${isDarkMode ? "white" : "black"};
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+      input:checked + .slider {
+        background-color: #ff0000;
+      }
+      input:focus + .slider {
+        box-shadow: 0 0 0px #ff0000;
+      }
+      input:checked + .slider:before {
+        -webkit-transform: translateX(29px);
+        -ms-transform: translateX(29px);
+        transform: translateX(29px);
+      }
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 12px;
+      }
+      .slider.round:before {
+        border-radius: 50%;
+      }
+      /* red progress bar */
+      #byts-progbar:hover #byts-progress::after,
+      #byts-progbar.show-dot #byts-progress::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translate(50%, -50%);
+        width: 15px;
+        height: 15px;
+        background-color: #FF0000;
+        border-radius: 50%;
+        display: block;
+      }
+      `
     );
 
     let seekMouseDown = false;
@@ -376,9 +396,9 @@
     let doubleClickToFullscreen = await GM.getValue("doubleClickToFullscreen");
     let progressBarStyle = await GM.getValue("progressBarStyle");
     const checkpointStatusEnum = Object.freeze({
-      [i18n["off"]]: 0,
-      [i18n["temporary"]]: 1,
-      [i18n["permanent"]]: 2,
+      [i18n.off]: 0,
+      [i18n.temporary]: 1,
+      [i18n.permanent]: 2,
     });
     let continueFromLastCheckpoint = await GM.getValue(
       "continueFromLastCheckpoint"
@@ -398,7 +418,7 @@
       GM.setValue("operationMode", operationMode);
     }
     if (continueFromLastCheckpoint === void 0) {
-      continueFromLastCheckpoint = checkpointStatusEnum.OFF;
+      continueFromLastCheckpoint = checkpointStatusEnum[i18n.off];
       GM.setValue("continueFromLastCheckpoint", continueFromLastCheckpoint);
     }
     if (loopPlayback === void 0) {
@@ -410,11 +430,11 @@
       GM.setValue("openWatchInCurrentTab", openWatchInCurrentTab);
     }
     let shortsCheckpoints;
-    if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
+    if (continueFromLastCheckpoint !== checkpointStatusEnum[i18n.off]) {
       shortsCheckpoints = await GM.getValue("shortsCheckpoints");
       if (
         shortsCheckpoints === void 0 ||
-        continueFromLastCheckpoint === checkpointStatusEnum.TEMPORARY
+        continueFromLastCheckpoint === checkpointStatusEnum[i18n.temporary]
       ) {
         shortsCheckpoints = {};
         GM.setValue("shortsCheckpoints", shortsCheckpoints);
@@ -653,25 +673,23 @@
       }
     }
 
+    function handleEvent(e) {
+      videoOperationMode(e);
+      if (constantVolume) {
+        constantVolume = false;
+        requestAnimationFrame(() => (constantVolume = true));
+      }
+    }
+
     function addShortcuts() {
       if (operationMode === "Video") {
         const observer = new MutationObserver((mutations) => {
           for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
               if (node?.id === "byts-vol-div") {
-                document.addEventListener(
-                  "keydown",
-                  function (e) {
-                    videoOperationMode(e);
-                    if (constantVolume) {
-                      constantVolume = false;
-                      requestAnimationFrame(() => (constantVolume = true));
-                    }
-                  },
-                  {
-                    capture: true,
-                  }
-                );
+                document.addEventListener("keydown", handleEvent, {
+                  capture: true,
+                });
                 observer.disconnect();
               }
             }
@@ -799,7 +817,7 @@
       update(reel, video);
       newInstallation(reel, video);
 
-      if (continueFromLastCheckpoint !== checkpointStatusEnum.OFF) {
+      if (continueFromLastCheckpoint !== checkpointStatusEnum[i18n.off]) {
         const currentSec = Math.floor(video.currentTime);
         const shortsUrlList = location.href.split("/");
         if (!shortsUrlList.includes("shorts")) return;
@@ -872,7 +890,6 @@
           volumeSliderDiv.appendChild(volumeTextDiv);
         }
         reel.appendChild(volumeSliderDiv);
-        audioInitialized = true;
       }
       if (constantVolume) {
         video.volume = volumeSlider.value;
@@ -1014,9 +1031,7 @@
           const autoScrollTextDiv = document.createElement("div");
           autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: ${
             userLanguage.includes("zh") ? "3px" : "4px"
-          }; color: ${
-            isDarkMode ? "white" : "black"
-          }; font-size: 1.2rem;`;
+          }; color: ${isDarkMode ? "white" : "black"}; font-size: 1.2rem;`;
           autoScrollTextDiv.textContent = i18n.autoScroll;
           autoScrollDiv.appendChild(autoScrollTextDiv);
           const autoScrollSwitch = document.createElement("label");
@@ -1052,8 +1067,6 @@
         }
       }
       autoScrollDiv.style.marginTop = `${reel.offsetHeight - 3}px`;
-      autoScrollSlider.style.marginTop = `0px`;
-      autoScrollSwitch.style.marginTop = "5px";
     }
   });
 
