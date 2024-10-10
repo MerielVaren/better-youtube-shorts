@@ -194,7 +194,6 @@
   const checkVideoPaused = (video, waitTime = 100) => {
     if (!video.paused) {
       video.pause();
-      console.log("Video paused");
       interval = setTimeout(() => checkVideoPaused(video, waitTime), waitTime);
     } else {
       clearTimeout(interval);
