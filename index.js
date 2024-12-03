@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.2.8
+// @version            2.2.9
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
@@ -29,10 +29,10 @@
     zhSimplified: {
       closeText: `<br>双击关闭此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我们完善了语言的国际化💬<br>
-        现在支持简体中文，繁体中文和英文🌎<br>
-        如果需要支持更多语言<br>
-        请在tampemonkey的反馈区留言📝<br>
+        针对Youtube Shorts的更新🌟<br>
+        我们也做了相应的调整🔧<br>
+        现在shorts的全屏以一种更自然的方式工作📺<br>
+        希望你会喜欢这个更新🎉<br>
       `,
       newInstallationText: `
         欢迎使用 Better YouTube Shorts🎉<br>
@@ -70,10 +70,10 @@
     zhTraditional: {
       closeText: `<br>雙擊關閉此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我們完善了語言的國際化💬<br>
-        現在支持繁體中文，簡體中文以及英文🌎<br>
-        如果需要支持更多語言<br>
-        請在tampemonkey的反饋區留言📝<br>
+        針對Youtube Shorts的更新🌟<br>
+        我們也做了相應的調整🔧<br>
+        現在shorts的全屏以一種更自然的方式工作📺<br>
+        希望你會喜歡這個更新🎉<br>
       `,
       newInstallationText: `
         歡迎使用 Better YouTube Shorts🎉<br>
@@ -111,10 +111,10 @@
     en: {
       closeText: `<br>Double click to close this message👆`,
       updateText: `BTYS Version ${GM_info.script.version}<br>
-        We have improved the internationalization of languages💬<br>
-        Now supports English, Chinese Simplified, and Chinese Traditional🌎<br>
-        If you need support for more languages<br>
-        Please leave a message in the tampemonkey feedback area📝<br>
+        In response to the update of Youtube Shorts🌟<br>
+        We have also made corresponding adjustments🔧<br>
+        Now the fullscreen of shorts works in a more natural way📺<br>
+        Hope you will like this update🎉<br>
       `,
       newInstallationText: `
         Welcome to Better YouTube Shorts🎉<br>
@@ -150,8 +150,10 @@
       shortsAutoSwitchToVideo: "Shorts Auto Switch To Video",
     },
   };
-  const i18n = userLanguage.includes("zh")
-    ? userLanguage === "zh-CN" || userLanguage === "zh-SG"
+  const i18n = userLanguage.toUpperCase().includes("ZH")
+    ? ["ZH", "ZH-CN", "ZH-SG", "ZH-MY", "ZH-HANS"].includes(
+        userLanguage.toUpperCase()
+      )
       ? i18nText.zhSimplified
       : i18nText.zhTraditional
     : i18nText.en;
@@ -720,7 +722,14 @@
           if (document.fullscreenElement) {
             document.exitFullscreen();
           } else {
-            document.getElementsByTagName("ytd-app")[0].requestFullscreen();
+            const fullscreenButton = document.querySelector(
+              "#fullscreen-button-shape > button"
+            );
+            if (fullscreenButton) {
+              fullscreenButton.click();
+            } else {
+              document.getElementsByTagName("ytd-app")[0].requestFullscreen();
+            }
           }
         });
       }
@@ -729,7 +738,14 @@
           if (document.fullscreenElement) {
             document.exitFullscreen();
           } else {
-            document.getElementsByTagName("ytd-app")[0].requestFullscreen();
+            const fullscreenButton = document.querySelector(
+              "#fullscreen-button-shape > button"
+            );
+            if (fullscreenButton) {
+              fullscreenButton.click();
+            } else {
+              document.getElementsByTagName("ytd-app")[0].requestFullscreen();
+            }
           }
         }
       });
