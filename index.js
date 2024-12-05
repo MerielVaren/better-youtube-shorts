@@ -23,7 +23,8 @@
 // ==/UserScript==
 
 (async () => {
-  const shouldNotifyUserAboutChanges = true;
+  // Not notify users about changes in version 2.3.2
+  const shouldNotifyUserAboutChanges = false;
   const userLanguage = navigator.language || navigator.userLanguage;
   const i18nText = {
     zhSimplified: {
