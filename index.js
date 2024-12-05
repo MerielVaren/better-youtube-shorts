@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.3
+// @version            2.3.5
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -1128,9 +1128,12 @@
         if (speedSliderDiv === null) {
           speedSliderDiv = document.createElement("div");
           speedSliderDiv.id = "byts-speed-div";
-          speedSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 260px; margin-top: ${reel.offsetHeight}px;`;
+          speedSliderDiv.style.cssText = `user-select: none; display: flex; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: ${
+            // userLanguage.toUpperCase().includes("ZH") ? "260px" : "251px"
+            reel.offsetWidth - 176
+          }px; margin-top: ${reel.offsetHeight}px;`;
           speedSlider = document.createElement("input");
-          speedSlider.style.cssText = `user-select: none; width: 50px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
+          speedSlider.style.cssText = `user-select: none; display: flex; width: 50px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
           speedSlider.type = "range";
           speedSlider.id = "byts-speed";
           speedSlider.className = "speedslider";
@@ -1146,7 +1149,7 @@
           speedSliderDiv.appendChild(speedSlider);
           speedTextDiv = document.createElement("div");
           speedTextDiv.id = "byts-speed-textdiv";
-          speedTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: ${
+          speedTextDiv.style.cssText = `user-select: none; display: flex; background-color: transparent; color: ${
             isDarkMode ? "white" : "black"
           }; font-size: 1.2rem; margin-left: ${speedSlider.offsetWidth + 5}px`;
           speedTextDiv.textContent = `${parseFloat(video.playbackRate).toFixed(
@@ -1161,7 +1164,11 @@
         1
       )}x`;
       speedSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
+      speedSliderDiv.style.marginLeft = `${reel.offsetWidth - 176}px`;
       speedTextDiv.style.marginLeft = `${speedSlider.offsetWidth + 5}px`;
+      if (reel.offsetHeight < 735) {
+        reel.removeChild(speedSliderDiv);
+      }
 
       // AutoScroll
       let autoScrollDiv = document.getElementById("byts-autoscroll-div");
@@ -1175,7 +1182,7 @@
           }px;`;
           const autoScrollTextDiv = document.createElement("div");
           autoScrollTextDiv.style.cssText = `display: flex; margin-right: 5px; margin-top: ${
-            userLanguage.includes("zh") ? "3px" : "4px"
+            userLanguage.toUpperCase().includes("ZH") ? "3px" : "5px"
           }; color: ${isDarkMode ? "white" : "black"}; font-size: 1.2rem;`;
           autoScrollTextDiv.textContent = i18n.autoScroll;
           autoScrollDiv.appendChild(autoScrollTextDiv);
