@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.1
+// @version            2.3.2
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -839,9 +839,14 @@
       });
       document.addEventListener("keydown", function (e) {
         if (e.key.toUpperCase() === "C") {
-          video.playbackRate += 0.1;
+          // video.playbackRate += 0.1;
+          if (video.playbackRate < 3) {
+            video.playbackRate += 0.1;
+          }
         } else if (e.key.toUpperCase() === "X") {
-          video.playbackRate -= 0.1;
+          if (video.playbackRate > 0.1) {
+            video.playbackRate -= 0.1;
+          }
         } else if (e.key.toUpperCase() === "Z") {
           video.playbackRate = 1;
         }
@@ -1130,7 +1135,7 @@
           speedSlider.id = "byts-speed";
           speedSlider.className = "speedslider";
           speedSlider.name = "speed";
-          speedSlider.min = 0.5;
+          speedSlider.min = 0.1;
           speedSlider.max = 3.0;
           speedSlider.step = 0.1;
           speedSlider.value = video.playbackRate;
