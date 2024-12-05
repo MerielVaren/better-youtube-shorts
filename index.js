@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.6
+// @version            2.3.7
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -36,6 +36,9 @@
         使用 Z 键来恢复视频播放速度🔄<br>
         并且我们也添加了一个速度的滑块🏂️<br>
         你可以通过滑块来调整视频的播放速度🎢<br>
+        我们也添加了“恒定速度”的选项🛠️<br>
+        你可以在 Tampermonkey 菜单中的设置中找到它📢<br>
+        当你开启“恒定速度”后，所有的shorts会以设定的速度播放🎥<br>
         希望你会喜欢这个更新🎉<br>
       `,
       newInstallationText: `
@@ -58,6 +61,7 @@
       on: "开启",
       off: "关闭",
       constantVolume: "恒定音量",
+      constantSpeed: "恒定速度",
       operationMode: "快捷键",
       videoMode: "视频操作模式",
       shortsMode: "短视频操作模式",
@@ -84,6 +88,9 @@
         使用 Z 鍵來恢復視頻播放速度🔄<br>
         並且我們也添加了一個速度的滑塊🏂️<br>
         你可以通過滑塊來調整視頻的播放速度🎢<br>
+        我們也添加了“恆定速度”的選項🛠️<br>
+        你可以在 Tampermonkey 菜單中的設置中找到它📢<br>
+        當你開啟“恆定速度”後，所有的shorts會以設定的速度播放🎥<br>
         希望你會喜歡這個更新🎉<br>
       `,
       newInstallationText: `
@@ -106,6 +113,7 @@
       on: "開啟",
       off: "關閉",
       constantVolume: "恆定音量",
+      constantSpeed: "恆定速度",
       operationMode: "快捷鍵",
       videoMode: "視頻操作模式",
       shortsMode: "短視頻操作模式",
@@ -132,6 +140,9 @@
         Use Z key to restore video playback speed🔄<br>
         And we have also added a speed slider🏂️<br>
         You can use the slider to adjust the video playback speed🎢<br>
+        We have also added the "Constant Speed" option🛠️<br>
+        You can find it in the settings in the Tampermonkey menu📢<br>
+        When you turn on "Constant Speed", all shorts will play at the set speed🎥<br>
         Hope you will like this update🎉<br>
       `,
       newInstallationText: `
@@ -154,6 +165,7 @@
       on: "on",
       off: "off",
       constantVolume: "Constant Volume",
+      constantSpeed: "Constant Speed",
       operationMode: "Operation Mode",
       videoMode: "video operation mode",
       shortsMode: "shorts operation mode",
@@ -464,6 +476,7 @@
     let autoScroll = await GM.getValue("autoScroll");
     let loopPlayback = await GM.getValue("loopPlayback");
     let constantVolume = await GM.getValue("constantVolume");
+    let constantSpeed = await GM.getValue("constantSpeed");
     let operationMode = await GM.getValue("operationMode");
     let openWatchInCurrentTab = await GM.getValue("openWatchInCurrentTab");
     let doubleClickToFullscreen = await GM.getValue("doubleClickToFullscreen");
@@ -485,6 +498,10 @@
     if (constantVolume === void 0) {
       constantVolume = false;
       GM.setValue("constantVolume", constantVolume);
+    }
+    if (constantSpeed === void 0) {
+      constantSpeed = false;
+      GM.setValue("constantSpeed", constantSpeed);
     }
     if (operationMode === void 0) {
       operationMode = "Shorts";
@@ -527,6 +544,15 @@
       () => {
         constantVolume = !constantVolume;
         GM.setValue("constantVolume", constantVolume).then(() =>
+          location.reload()
+        );
+      }
+    );
+    GM.registerMenuCommand(
+      `${i18n.constantSpeed}: ${constantSpeed ? i18n.on : i18n.off}`,
+      () => {
+        constantSpeed = !constantSpeed;
+        GM.setValue("constantSpeed", constantSpeed).then(() =>
           location.reload()
         );
       }
@@ -839,7 +865,6 @@
       });
       document.addEventListener("keydown", function (e) {
         if (e.key.toUpperCase() === "C") {
-          // video.playbackRate += 0.1;
           if (video.playbackRate < 3) {
             video.playbackRate += 0.1;
           }
@@ -850,6 +875,7 @@
         } else if (e.key.toUpperCase() === "Z") {
           video.playbackRate = 1;
         }
+        GM.setValue("playbackRate", video.playbackRate);
       });
     }
 
@@ -899,6 +925,10 @@
 
       if (constantVolume) {
         video.volume = await GM.getValue("volume", 0);
+      }
+
+      if (constantSpeed) {
+        video.playbackRate = await GM.getValue("playbackRate", 1);
       }
 
       const reel = document.querySelector("ytd-reel-video-renderer[is-active]");
@@ -1146,6 +1176,7 @@
           speedSlider.addEventListener("input", function () {
             video.playbackRate = this.value;
             speedTextDiv.textContent = `${this.value}x`;
+            GM.setValue("playbackRate", this.value);
           });
           speedSliderDiv.appendChild(speedSlider);
           speedTextDiv = document.createElement("div");
