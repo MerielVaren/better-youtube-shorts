@@ -3,9 +3,10 @@
 ## 為 youtube shorts 提供了更多功能，包括
 
 - 可自動跳轉到對應video界面
-- 快捷鍵 alt + w ，可手動打開shorts對應的video界面，如[https://www.youtube.com/shorts/9wRiG-A7K8A](https://www.youtube.com/shorts/9wRiG-A7K8A)，本腳本可打開[https://www.youtube.com/watch?v=9wRiG-A7K8A](https://www.youtube.com/watch?v=9wRiG-A7K8A)，在影片界面打開當前shorts
+- 可手動跳轉到對應video界面，快捷鍵 alt + w ，如[https://www.youtube.com/shorts/9wRiG-A7K8A](https://www.youtube.com/shorts/9wRiG-A7K8A)，按下 alt + w 后可打開[https://www.youtube.com/watch?v=9wRiG-A7K8A](https://www.youtube.com/watch?v=9wRiG-A7K8A)，在影片界面打開當前shorts
 - 進度條（含時間顯示，可以拖動）
 - 音量控制（含音量顯示）
+- 播放速度控制
 - 自動滾動控制
 
 ### 腳本推薦：[Tabview Youtube](https://greasyfork.org/zh-CN/scripts/428651-tabview-youtube)，最大的優點是能一邊看影片一邊看評論而不用來回的上下滾動，非常好用
@@ -69,6 +70,9 @@
   - alt + 回車(包括數字鍵盤的回車) - 全螢幕
   - alt + w - 打開shorts對應的影片界面
   - 0~9(包括數字鍵盤) - 跳轉到對應的進度
+  - C - 加快播放速度
+  - X - 減慢播放速度
+  - Z - 恢復播放速度
 - Shorts (Youtube Shorts採用的快捷鍵，加上shift控制音量)
   - 上/下箭頭 - 上一個/下一個影片
   - 左/右箭頭 - 後退/前進
@@ -79,3 +83,6 @@
   - alt + 回車(包括數字鍵盤的回車) - 全螢幕
   - alt + w - 打開shorts對應的影片界面
   - 0~9(包括數字鍵盤) - 跳轉到對應的進度
+  - C - 加快播放速度
+  - X - 減慢播放速度
+  - Z - 恢復播放速度

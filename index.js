@@ -3,10 +3,10 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.0
-// @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, progress bar, auto scrolling, shortcut keys, and more.
-// @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，进度条，自动滚动，快捷键等等。
-// @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，進度條，自動滾動，快捷鍵等等。
+// @version            2.3.1
+// @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
+// @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
+// @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
 // @author             Meriel
 // @match              *://*.youtube.com/*
 // @exclude            *://music.youtube.com/*
@@ -29,9 +29,13 @@
     zhSimplified: {
       closeText: `<br>双击关闭此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        针对Youtube Shorts的更新🌟<br>
-        我们也做了相应的调整🔧<br>
-        现在shorts的全屏以一种更自然的方式工作📺<br>
+        我们现在添加了控制视频播放速度的功能🎉<br>
+        现在你可以：<br>
+        使用 C 键来增加视频播放速度⏩<br>
+        使用 X 键来减少视频播放速度⏪<br>
+        使用 Z 键来恢复视频播放速度🔄<br>
+        并且我们也添加了一个速度的滑块🏂️<br>
+        你可以通过滑块来调整视频的播放速度🎢<br>
         希望你会喜欢这个更新🎉<br>
       `,
       newInstallationText: `
@@ -47,6 +51,9 @@
         Alt + 回车: 切换全屏<br>
         Alt + W: 在当前标签页中打开观看页面<br>
         0~9: 跳转到对应的进度<br>
+        C: 增加视频播放速度<br>
+        X: 减少视频播放速度<br>
+        Z: 恢复视频播放速度<br>
       `,
       on: "开启",
       off: "关闭",
@@ -70,9 +77,13 @@
     zhTraditional: {
       closeText: `<br>雙擊關閉此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        針對Youtube Shorts的更新🌟<br>
-        我們也做了相應的調整🔧<br>
-        現在shorts的全屏以一種更自然的方式工作📺<br>
+        我們現在添加了控制視頻播放速度的功能🎉<br>
+        現在你可以：<br>
+        使用 C 鍵來增加視頻播放速度⏩<br>
+        使用 X 鍵來減少視頻播放速度⏪<br>
+        使用 Z 鍵來恢復視頻播放速度🔄<br>
+        並且我們也添加了一個速度的滑塊🏂️<br>
+        你可以通過滑塊來調整視頻的播放速度🎢<br>
         希望你會喜歡這個更新🎉<br>
       `,
       newInstallationText: `
@@ -88,6 +99,9 @@
         Alt + 回車: 切換全屏<br>
         Alt + W: 在當前標籤頁中打開觀看頁面<br>
         0~9: 跳轉到對應的進度<br>
+        C: 增加視頻播放速度<br>
+        X: 減少視頻播放速度<br>
+        Z: 恢復視頻播放速度<br>
       `,
       on: "開啟",
       off: "關閉",
@@ -111,9 +125,13 @@
     en: {
       closeText: `<br>Double click to close this message👆`,
       updateText: `BTYS Version ${GM_info.script.version}<br>
-        In response to the update of Youtube Shorts🌟<br>
-        We have also made corresponding adjustments🔧<br>
-        Now the fullscreen of shorts works in a more natural way📺<br>
+        We have now added the ability to control video playback speed🎉<br>
+        Now you can:<br>
+        Use C key to increase video playback speed⏩<br>
+        Use X key to decrease video playback speed⏪<br>
+        Use Z key to restore video playback speed🔄<br>
+        And we have also added a speed slider🏂️<br>
+        You can use the slider to adjust the video playback speed🎢<br>
         Hope you will like this update🎉<br>
       `,
       newInstallationText: `
@@ -129,6 +147,9 @@
         Alt + Enter: Toggle fullscreen<br>
         Alt + W: Open watch page in current tab<br>
         0~9: Jump to the corresponding progress<br>
+        C: Increase video playback speed<br>
+        X: Decrease video playback speed<br>
+        Z: Restore video playback speed<br>
       `,
       on: "on",
       off: "off",
@@ -305,6 +326,7 @@
         border-radius: 50%;
         background: ${isDarkMode ? "white" : "black"};
       }
+
       /* Firefox */
       input[type="range"].volslider::-moz-range-track {
         height: 8px;
@@ -320,6 +342,7 @@
         border-radius: 50%;
         background: ${isDarkMode ? "white" : "black"};
       }
+
       .switch {
         position: relative;
         display: inline-block;
@@ -331,6 +354,8 @@
         width: 0;
         height: 0;
       }
+
+      /* The slider */
       .slider {
         position: absolute;
         cursor: pointer;
@@ -364,6 +389,7 @@
         -ms-transform: translateX(29px);
         transform: translateX(29px);
       }
+
       /* Rounded sliders */
       .slider.round {
         border-radius: 12px;
@@ -371,6 +397,7 @@
       .slider.round:before {
         border-radius: 50%;
       }
+
       /* red progress bar */
       #byts-progbar:hover #byts-progress::after,
       #byts-progbar.show-dot #byts-progress::after {
@@ -384,6 +411,49 @@
         background-color: #FF0000;
         border-radius: 50%;
         display: block;
+      }
+
+      /* speed slider */
+      input[type="range"].speedslider {
+        height: 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none; /* Firefox */
+        appearance: none;
+        margin: 10px 0;
+      }
+      input[type="range"].speedslider:focus {
+        outline: none;
+      }
+      input[type="range"].speedslider::-webkit-slider-runnable-track {
+        height: 8px;
+        cursor: pointer;
+        box-shadow: 0px 0px 0px #000000;
+        background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
+        border-radius: 25px;
+      }
+      input[type="range"].speedslider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        margin-top: -2px;
+        border-radius: 50%;
+        background: ${isDarkMode ? "white" : "black"};
+      }
+
+      /* Firefox */
+      input[type="range"].speedslider::-moz-range-track {
+        height: 8px;
+        cursor: pointer;
+        box-shadow: 0px 0px 0px #000000;
+        background: ${isDarkMode ? "rgb(50, 50, 50)" : "#ccc"};
+        border-radius: 25px;
+      }
+      input[type="range"].speedslider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        border: none;
+        border-radius: 50%;
+        background: ${isDarkMode ? "white" : "black"};
       }
       `
     );
@@ -767,6 +837,15 @@
           video.currentTime = video.duration * (e.key / 10);
         }
       });
+      document.addEventListener("keydown", function (e) {
+        if (e.key.toUpperCase() === "C") {
+          video.playbackRate += 0.1;
+        } else if (e.key.toUpperCase() === "X") {
+          video.playbackRate -= 0.1;
+        } else if (e.key.toUpperCase() === "Z") {
+          video.playbackRate = 1;
+        }
+      });
     }
 
     function padTo2Digits(num) {
@@ -1034,6 +1113,50 @@
         }
       }
       timeInfo.style.marginTop = `${reel.offsetHeight - 2}px`;
+
+      // Speed Slider
+      let speedSliderDiv = document.getElementById("byts-speed-div");
+      let speedSlider = document.getElementById("byts-speed");
+      let speedTextDiv = document.getElementById("byts-speed-textdiv");
+      const reelSpeedSliderDiv = reel.querySelector("#byts-speed-div");
+      if (reelSpeedSliderDiv === null) {
+        if (speedSliderDiv === null) {
+          speedSliderDiv = document.createElement("div");
+          speedSliderDiv.id = "byts-speed-div";
+          speedSliderDiv.style.cssText = `user-select: none; width: 100px; left: 0px; background-color: transparent; position: absolute; margin-left: 260px; margin-top: ${reel.offsetHeight}px;`;
+          speedSlider = document.createElement("input");
+          speedSlider.style.cssText = `user-select: none; width: 50px; left: 0px; background-color: transparent; position: absolute; margin-top: 0px;`;
+          speedSlider.type = "range";
+          speedSlider.id = "byts-speed";
+          speedSlider.className = "speedslider";
+          speedSlider.name = "speed";
+          speedSlider.min = 0.5;
+          speedSlider.max = 3.0;
+          speedSlider.step = 0.1;
+          speedSlider.value = video.playbackRate;
+          speedSlider.addEventListener("input", function () {
+            video.playbackRate = this.value;
+            speedTextDiv.textContent = `${this.value}x`;
+          });
+          speedSliderDiv.appendChild(speedSlider);
+          speedTextDiv = document.createElement("div");
+          speedTextDiv.id = "byts-speed-textdiv";
+          speedTextDiv.style.cssText = `user-select: none; background-color: transparent; position: absolute; color: ${
+            isDarkMode ? "white" : "black"
+          }; font-size: 1.2rem; margin-left: ${speedSlider.offsetWidth + 5}px`;
+          speedTextDiv.textContent = `${parseFloat(video.playbackRate).toFixed(
+            1
+          )}x`;
+          speedSliderDiv.appendChild(speedTextDiv);
+        }
+        reel.appendChild(speedSliderDiv);
+      }
+      speedSlider.value = video.playbackRate;
+      speedTextDiv.textContent = `${parseFloat(video.playbackRate).toFixed(
+        1
+      )}x`;
+      speedSliderDiv.style.marginTop = `${reel.offsetHeight + 2}px`;
+      speedTextDiv.style.marginLeft = `${speedSlider.offsetWidth + 5}px`;
 
       // AutoScroll
       let autoScrollDiv = document.getElementById("byts-autoscroll-div");
