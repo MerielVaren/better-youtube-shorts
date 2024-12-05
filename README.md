@@ -44,21 +44,26 @@
 - off: 使用youtube對shorts使用的默認音量邏輯，每個影片都有自己的音量
 - on: 所有瀏覽的shorts都採用用戶在音量條上設置的音量
 
-### 5. 選項 "Open Watch In Current Tab"（該選項在ShortsAutoSwitchToVideo為off，即停留在shorts界面時才有效）
+### 5. 選項 "Constant Speed"
+
+- off: 使用youtube對shorts使用的默認播放速度邏輯，每個影片都有自己的播放速度
+- on: 所有瀏覽的shorts都採用用戶在播放速度條上設置的播放速度
+
+### 6. 選項 "Open Watch In Current Tab"（該選項在ShortsAutoSwitchToVideo為off，即停留在shorts界面時才有效）
 
 - off: 在新標籤頁打開當前shorts對應的watch界面
 - on: 在當前標籤頁打開shorts對應的watch界面
 
-### 6. 選項 "Double Click To Fullscreen"
+### 7. 選項 "Double Click To Fullscreen"
 
 - off: 關閉雙擊全螢幕（以便相容其他插件在shorts上的雙擊操作）
 - on: 打開雙擊全螢幕
 
-### 7. 選項 "Progress Bar Style"
+### 8. 選項 "Progress Bar Style"
 - original: 使用youtube原生的進度條
 - custom: 使用Better Youtube Shorts自定義的進度條
 
-### 8. 選項 "Operation Mode"
+### 9. 選項 "Operation Mode"
 
 - Video (Yotube影片採用的快捷鍵，加上shift控制滾動影片)
   - 上/下箭頭 - 音量減小/增大
