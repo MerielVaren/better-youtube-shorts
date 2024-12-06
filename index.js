@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.9
+// @version            2.4.0
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -49,6 +49,7 @@
         C: 增加视频播放速度<br>
         X: 减少视频播放速度<br>
         Z: 恢复视频播放速度<br>
+        V: 显示/隐藏视频介绍下方的shorts<br>
       `,
       on: "开启",
       off: "关闭",
@@ -93,6 +94,7 @@
         C: 增加視頻播放速度<br>
         X: 減少視頻播放速度<br>
         Z: 恢復視頻播放速度<br>
+        V: 顯示/隱藏視頻介紹下方的shorts<br>
       `,
       on: "開啟",
       off: "關閉",
