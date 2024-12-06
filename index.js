@@ -170,7 +170,9 @@
       : i18nText.zhTraditional
     : i18nText.en;
 
-  const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDarkMode =
+    window.matchMedia("(prefers-color-scheme: dark)").matches ||
+    document.documentElement.hasAttribute("dark");
   let currentUrl = "";
 
   const once = (fn) => {
@@ -970,9 +972,13 @@
         });
       }
 
-      const metaDescription = document.querySelector("ytd-reel-video-renderer[is-active] .metadata-container");
+      const metaDescription = document.querySelector(
+        "ytd-reel-video-renderer[is-active] .metadata-container"
+      );
       if (metaDescription) {
-        metaDescription.style.visibility = hideMetaDescription ? "hidden" : "visible";
+        metaDescription.style.visibility = hideMetaDescription
+          ? "hidden"
+          : "visible";
       }
 
       // Volume Slider
