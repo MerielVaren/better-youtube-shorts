@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.3.8
+// @version            2.3.9
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -29,16 +29,8 @@
     zhSimplified: {
       closeText: `<br>双击关闭此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我们现在添加了控制视频播放速度的功能🎉<br>
-        现在你可以：<br>
-        使用 C 键来增加视频播放速度⏩<br>
-        使用 X 键来减少视频播放速度⏪<br>
-        使用 Z 键来恢复视频播放速度🔄<br>
-        并且我们也添加了一个速度的滑块🏂️<br>
-        你可以通过滑块来调整视频的播放速度🎢<br>
-        我们也添加了“恒定速度”的选项🛠️<br>
-        你可以在 Tampermonkey 菜单中的设置中找到它📢<br>
-        当你开启“恒定速度”后，所有的shorts会以设定的速度播放🎥<br>
+        我们添加了一个快捷键V🛠️<br>
+        用于显示/隐藏shorts下方的视频介绍📢<br>
         希望你会喜欢这个更新🎉<br>
       `,
       newInstallationText: `
@@ -81,16 +73,8 @@
     zhTraditional: {
       closeText: `<br>雙擊關閉此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我們現在添加了控制視頻播放速度的功能🎉<br>
-        現在你可以：<br>
-        使用 C 鍵來增加視頻播放速度⏩<br>
-        使用 X 鍵來減少視頻播放速度⏪<br>
-        使用 Z 鍵來恢復視頻播放速度🔄<br>
-        並且我們也添加了一個速度的滑塊🏂️<br>
-        你可以通過滑塊來調整視頻的播放速度🎢<br>
-        我們也添加了“恆定速度”的選項🛠️<br>
-        你可以在 Tampermonkey 菜單中的設置中找到它📢<br>
-        當你開啟“恆定速度”後，所有的shorts會以設定的速度播放🎥<br>
+        我們添加了一個快捷鍵V🛠️<br>
+        用於顯示/隱藏shorts下方的視頻介紹📢<br>
         希望你會喜歡這個更新🎉<br>
       `,
       newInstallationText: `
@@ -133,16 +117,8 @@
     en: {
       closeText: `<br>Double click to close this message👆`,
       updateText: `BTYS Version ${GM_info.script.version}<br>
-        We have now added the ability to control video playback speed🎉<br>
-        Now you can:<br>
-        Use C key to increase video playback speed⏩<br>
-        Use X key to decrease video playback speed⏪<br>
-        Use Z key to restore video playback speed🔄<br>
-        And we have also added a speed slider🏂️<br>
-        You can use the slider to adjust the video playback speed🎢<br>
-        We have also added the "Constant Speed" option🛠️<br>
-        You can find it in the settings in the Tampermonkey menu📢<br>
-        When you turn on "Constant Speed", all shorts will play at the set speed🎥<br>
+        We have added a shortcut key V🛠️<br>
+        To show/hide the video description below shorts📢<br>
         Hope you will like this update🎉<br>
       `,
       newInstallationText: `
@@ -161,6 +137,7 @@
         C: Increase video playback speed<br>
         X: Decrease video playback speed<br>
         Z: Restore video playback speed<br>
+        V: Show/hide video description below shorts<br>
       `,
       on: "on",
       off: "off",
@@ -876,6 +853,16 @@
           video.playbackRate = 1;
         }
         GM.setValue("playbackRate", video.playbackRate);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key.toUpperCase() === "V") {
+          const metaDescription = document.querySelector(".metadata-container");
+          const visibility = metaDescription.style.visibility;
+          if (metaDescription) {
+            metaDescription.style.visibility =
+              visibility === "hidden" ? "visible" : "hidden";
+          }
+        }
       });
     }
 

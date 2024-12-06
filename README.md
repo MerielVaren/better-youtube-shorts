@@ -60,6 +60,7 @@
 - on: 打開雙擊全螢幕
 
 ### 8. 選項 "Progress Bar Style"
+
 - original: 使用youtube原生的進度條
 - custom: 使用Better Youtube Shorts自定義的進度條
 
@@ -78,6 +79,7 @@
   - C - 加快播放速度
   - X - 減慢播放速度
   - Z - 恢復播放速度
+  - V - 顯示/隱藏shorts介紹
 - Shorts (Youtube Shorts採用的快捷鍵，加上shift控制音量)
   - 上/下箭頭 - 上一個/下一個影片
   - 左/右箭頭 - 後退/前進
@@ -91,3 +93,4 @@
   - C - 加快播放速度
   - X - 減慢播放速度
   - Z - 恢復播放速度
+  - V - 顯示/隱藏shorts介紹
