@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.4.2
+// @version            2.4.3
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -29,9 +29,10 @@
     zhSimplified: {
       closeText: `<br>双击关闭此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我们添加了一个快捷键V🛠️<br>
-        用于显示/隐藏shorts下方的视频介绍📢<br>
-        希望你会喜欢这个更新🎉<br>
+        Hi，这次BYTS没有更新功能🛠️<br>
+        只是我在刷shorts的时候发现YouTube更新了一个功能🎉<br>
+        现在鼠标长按视频会二倍速播放📢<br>
+        我是最后一个知道这个功能的吗🤔<br>
       `,
       newInstallationText: `
         欢迎使用 Better YouTube Shorts🎉<br>
@@ -74,9 +75,10 @@
     zhTraditional: {
       closeText: `<br>雙擊關閉此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        我們添加了一個快捷鍵V🛠️<br>
-        用於顯示/隱藏shorts下方的視頻介紹📢<br>
-        希望你會喜歡這個更新🎉<br>
+        Hi，這次BYTS沒有更新功能🛠️<br>
+        只是我在刷shorts的時候發現YouTube更新了一個功能🎉<br>
+        現在滑鼠長按視頻會二倍速播放📢<br>
+        我是最後一個知道這個功能的嗎🤔<br>
       `,
       newInstallationText: `
         歡迎使用 Better YouTube Shorts🎉<br>
@@ -119,9 +121,10 @@
     en: {
       closeText: `<br>Double click to close this message👆`,
       updateText: `BTYS Version ${GM_info.script.version}<br>
-        We have added a shortcut key V🛠️<br>
-        To show/hide the video description below shorts📢<br>
-        Hope you will like this update🎉<br>
+        Hi, there is no new feature in BYTS this time🛠️<br>
+        I just found a new feature that YouTube updated when I was watching shorts🎉<br>
+        Now you can long press the left mouse button on the video to play it at 2x speed📢<br>
+        Am I the last one to know this feature🤔<br>
       `,
       newInstallationText: `
         Welcome to Better YouTube Shorts🎉<br>
