@@ -3,7 +3,7 @@
 // @name:zh-CN         更好的 Youtube Shorts
 // @name:zh-TW         更好的 Youtube Shorts
 // @namespace          Violentmonkey Scripts
-// @version            2.4.3
+// @version            2.4.4
 // @description        Provide more control functions for YouTube Shorts, including automatic/manual redirection to corresponding video pages, volume control, playback speed control, progress bar, auto scrolling, shortcut keys, and more.
 // @description:zh-CN  为 Youtube Shorts提供更多的控制功能，包括自动/手动跳转到对应视频页面，音量控制，播放速度控制，进度条，自动滚动，快捷键等等。
 // @description:zh-TW  為 Youtube Shorts提供更多的控制功能，包括自動/手動跳轉到對應影片頁面，音量控制，播放速度控制，進度條，自動滾動，快捷鍵等等。
@@ -29,10 +29,12 @@
     zhSimplified: {
       closeText: `<br>双击关闭此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        Hi，这次BYTS没有更新功能🛠️<br>
-        只是我在刷shorts的时候发现YouTube更新了一个功能🎉<br>
-        现在鼠标长按视频会二倍速播放📢<br>
-        我是最后一个知道这个功能的吗🤔<br>
+        Hi，这次更新修复了一个小问题🛠️<br>
+        当打开自动滚动与记忆视频进度时<br>
+        如果一个视频播放完并跳转到了下一个<br>
+        此时回到上一个视频应该是从头开始的而不是从最后开始🤔<br>
+        这个逻辑才是正确的📢<br>
+        现在已经修复了这个问题🎉<br>
       `,
       newInstallationText: `
         欢迎使用 Better YouTube Shorts🎉<br>
@@ -75,10 +77,11 @@
     zhTraditional: {
       closeText: `<br>雙擊關閉此消息👆`,
       updateText: `BTYS 版本 ${GM_info.script.version}<br>
-        Hi，這次BYTS沒有更新功能🛠️<br>
-        只是我在刷shorts的時候發現YouTube更新了一個功能🎉<br>
-        現在滑鼠長按視頻會二倍速播放📢<br>
-        我是最後一個知道這個功能的嗎🤔<br>
+        Hi，這次更新修復了一個小問題🛠️<br>
+        當打開自動滾動與記憶視頻進度時<br>
+        如果一個視頻播放完並跳轉到了下一個<br>
+        此時回到上一個視頻應該是從頭開始的而不是從最後開始🤔<br>
+        這個邏輯才是正確的📢<br>
       `,
       newInstallationText: `
         歡迎使用 Better YouTube Shorts🎉<br>
@@ -121,10 +124,12 @@
     en: {
       closeText: `<br>Double click to close this message👆`,
       updateText: `BTYS Version ${GM_info.script.version}<br>
-        Hi, there is no new feature in BYTS this time🛠️<br>
-        I just found a new feature that YouTube updated when I was watching shorts🎉<br>
-        Now you can long press the left mouse button on the video to play it at 2x speed📢<br>
-        Am I the last one to know this feature🤔<br>
+        Hi, this update fixes a small issue🛠️<br>
+        When auto-scrolling and remembering video progress are enabled<br>
+        If a video finishes and jumps to the next one<br>
+        Returning to the previous video should start from the beginning rather than the end🤔<br>
+        This logic is correct📢<br>
+        This issue has been fixed🎉<br>
       `,
       newInstallationText: `
         Welcome to Better YouTube Shorts🎉<br>
@@ -938,7 +943,7 @@
       update(reel, video);
       newInstallation(reel, video);
 
-      if (continueFromLastCheckpoint !== checkpointStatusEnum[i18n.off]) {
+      if (continueFromLastCheckpoint !== checkpointStatusEnum[i18n.off] && video.duration) {
         const currentSec = Math.floor(video.currentTime);
         const shortsUrlList = location.href.split("/");
         if (!shortsUrlList.includes("shorts")) return;
